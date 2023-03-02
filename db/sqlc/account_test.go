@@ -3,14 +3,15 @@ package db
 import (
 	"context"
 	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/util"
 	"testing"
 )
 
 func TestQueries_CreateAccount(t *testing.T) {
 	arg := CreateAccountParams{
-		Owner:    "yusuf",
-		Balance:  100,
-		Currency: "USD",
+		Owner:    util.RandomOwner(),
+		Balance:  util.RandomMoney(),
+		Currency: util.RandomCurrency(),
 	}
 
 	account, err := testQueries.CreateAccount(context.Background(), arg)
