@@ -19,29 +19,51 @@ func TestServer_GetAccount(t *testing.T) {
 	account := randomAccount()
 
 	// TODO: define table driven test sets
+	testCases := []struct {
+		name          string
+		accountID     int64
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:      "OK", // happy case
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(account, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchAccount(t, recorder.Body, account)
+			},
+		},
+		// TODO: add more cases
+	}
 
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	store := mockdb.NewMockStore(ctrl)
+			store := mockdb.NewMockStore(ctrl)
+			// build stubs
+			testCase.buildStubs(store)
 
-	// build stubs
-	store.EXPECT().
-		GetAccount(gomock.Any(), gomock.Eq(account.ID)).
-		Times(1).
-		Return(account, nil)
+			// start test server and send request
+			server := NewServer(store)
 
-	server := NewServer(store)
+			recorder := httptest.NewRecorder()
 
-	recorder := httptest.NewRecorder()
+			requestTarget := fmt.Sprintf("/accounts/%d", account.ID)
+			request := httptest.NewRequest(http.MethodGet, requestTarget, nil)
+			server.router.ServeHTTP(recorder, request)
 
-	requestTarget := fmt.Sprintf("/accounts/%d", account.ID)
-	request := httptest.NewRequest(http.MethodGet, requestTarget, nil)
-	server.router.ServeHTTP(recorder, request)
-
-	// check response
-	require.Equal(t, http.StatusOK, recorder.Code)
-	requireBodyMatchAccount(t, recorder.Body, account)
+			// check response
+			testCase.checkResponse(t, recorder)
+		})
+	}
 }
 
 func randomAccount() db.Account {
