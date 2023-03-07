@@ -1,0 +1,9 @@
+### Create accounts
+POST http://localhost:8080/accounts
+Accept: */*
+Content-Type: application/json
+
+{
+  "owner": "Yusuf Manshur",
+  "currency": "USD"
+}
