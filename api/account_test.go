@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/golang/mock/gomock"
@@ -18,7 +19,7 @@ import (
 func TestServer_GetAccount(t *testing.T) {
 	account := randomAccount()
 
-	// TODO: define table driven test sets
+	// define table driven test sets
 	testCases := []struct {
 		name          string
 		accountID     int64
@@ -39,7 +40,44 @@ func TestServer_GetAccount(t *testing.T) {
 				requireBodyMatchAccount(t, recorder.Body, account)
 			},
 		},
-		// TODO: add more cases
+		{
+			name:      "Not Found",
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(db.Account{}, sql.ErrNoRows)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+		{
+			name:      "Internal Error",
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(db.Account{}, sql.ErrConnDone)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name:      "Bad Request",
+			accountID: 0,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -56,7 +94,7 @@ func TestServer_GetAccount(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 
-			requestTarget := fmt.Sprintf("/accounts/%d", account.ID)
+			requestTarget := fmt.Sprintf("/accounts/%d", testCase.accountID)
 			request := httptest.NewRequest(http.MethodGet, requestTarget, nil)
 			server.router.ServeHTTP(recorder, request)
 
