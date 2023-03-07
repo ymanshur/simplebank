@@ -3,14 +3,10 @@ package db
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/ymanshur/simplebank/util"
 	"log"
 	"os"
 	"testing"
-)
-
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
 )
 
 var (
@@ -19,9 +15,13 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	var err error
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
 
-	testDB, err = sql.Open(dbDriver, dbSource)
+	}
+
+	testDB, err = sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
