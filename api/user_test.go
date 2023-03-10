@@ -31,7 +31,7 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	err := util.CheckPassword(arg.HashedPassword, e.password)
+	err := util.CheckPassword(e.password, arg.HashedPassword)
 	if err != nil {
 		return false
 	}
@@ -62,9 +62,9 @@ func TestServer_CreateUser(t *testing.T) {
 			name: "OK",
 			body: gin.H{
 				"username":  user.Username,
-				"password":  password,
 				"full_name": user.FullName,
 				"email":     user.Email,
+				"password":  password,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.CreateUserParams{
@@ -87,9 +87,9 @@ func TestServer_CreateUser(t *testing.T) {
 			name: "Internal Error",
 			body: gin.H{
 				"username":  user.Username,
-				"password":  password,
 				"full_name": user.FullName,
 				"email":     user.Email,
+				"password":  password,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -105,9 +105,9 @@ func TestServer_CreateUser(t *testing.T) {
 			name: "Duplicate Username",
 			body: gin.H{
 				"username":  user.Username,
-				"password":  password,
 				"full_name": user.FullName,
 				"email":     user.Email,
+				"password":  password,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -123,9 +123,9 @@ func TestServer_CreateUser(t *testing.T) {
 			name: "Invalid Username",
 			body: gin.H{
 				"username":  "invalid-user#1",
-				"password":  password,
 				"full_name": user.FullName,
 				"email":     user.Email,
+				"password":  password,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -140,9 +140,9 @@ func TestServer_CreateUser(t *testing.T) {
 			name: "Invalid Email",
 			body: gin.H{
 				"username":  user.Username,
-				"password":  password,
 				"full_name": user.FullName,
 				"email":     "invalid-email",
+				"password":  password,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -157,9 +157,9 @@ func TestServer_CreateUser(t *testing.T) {
 			name: "Too Short Password",
 			body: gin.H{
 				"username":  user.Username,
-				"password":  "123",
 				"full_name": user.FullName,
 				"email":     user.Email,
+				"password":  "123",
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
