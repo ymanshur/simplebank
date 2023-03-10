@@ -1,4 +1,16 @@
-### Create accounts
+### Create a user
+POST http://localhost:8080/users
+Accept: */*
+Content-Type: application/json
+
+{
+  "username": "ymanshur",
+  "full_name": "Yusuf Manshur",
+  "email": "ymanshur@gmail.com",
+  "password": "secret123"
+}
+
+### Create a account
 POST http://localhost:8080/accounts
 Accept: */*
 Content-Type: application/json
@@ -8,7 +20,7 @@ Content-Type: application/json
   "currency": "USD"
 }
 
-### Get account by id
+### Get a account by id
 GET http://localhost:8080/accounts/1
 Accept: */*
 
