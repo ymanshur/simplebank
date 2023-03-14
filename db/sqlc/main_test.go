@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
-	"github.com/ymanshur/simplebank/util"
+	"github.com/ymanshur/simplebank/pkg/util"
 	"log"
 	"os"
 	"testing"

@@ -3,10 +3,9 @@ package main
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
-	"github.com/ymanshur/simplebank/util"
-
 	"github.com/ymanshur/simplebank/api"
 	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/pkg/util"
 	"log"
 )
 

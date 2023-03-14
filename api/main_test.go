@@ -4,15 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	db "github.com/ymanshur/simplebank/db/sqlc"
-	"github.com/ymanshur/simplebank/util"
+	util2 "github.com/ymanshur/simplebank/pkg/util"
 	"os"
 	"testing"
 	"time"
 )
 
 func newTestServer(t *testing.T, store db.Store) *Server {
-	config := util.Config{
-		TokenSymmetricKey:   util.RandomString(32),
+	config := util2.Config{
+		TokenSymmetricKey:   util2.RandomString(32),
 		AccessTokenDuration: time.Minute,
 	}
 

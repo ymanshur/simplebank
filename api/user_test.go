@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
-	"github.com/ymanshur/simplebank/util"
+	util2 "github.com/ymanshur/simplebank/pkg/util"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +31,7 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	err := util.CheckPassword(e.password, arg.HashedPassword)
+	err := util2.CheckPassword(e.password, arg.HashedPassword)
 	if err != nil {
 		return false
 	}
@@ -201,15 +201,15 @@ func TestServer_CreateUser(t *testing.T) {
 
 // randomUser generate random user instance
 func randomUser(t *testing.T) (user db.User, password string) {
-	password = util.RandomString(6)
-	hashedPassword, err := util.HashPassword(password)
+	password = util2.RandomString(6)
+	hashedPassword, err := util2.HashPassword(password)
 	require.NoError(t, err)
 
 	user = db.User{
-		Username:       util.RandomOwner(),
+		Username:       util2.RandomOwner(),
 		HashedPassword: hashedPassword,
-		FullName:       util.RandomOwner(),
-		Email:          util.RandomEmail(),
+		FullName:       util2.RandomOwner(),
+		Email:          util2.RandomEmail(),
 	}
 	return
 }
