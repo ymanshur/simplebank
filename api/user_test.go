@@ -201,7 +201,7 @@ func TestServer_CreateUser(t *testing.T) {
 
 // randomUser generate random user instance
 func randomUser(t *testing.T) (user db.User, password string) {
-	password = util2.RandomString(6)
+	password = util2.RandomString(8)
 	hashedPassword, err := util2.HashPassword(password)
 	require.NoError(t, err)
 

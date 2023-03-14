@@ -39,3 +39,13 @@ Content-Type: application/json
   "amount": 10,
   "currency": "IDR"
 }
+
+### Login
+POST http://localhost:8080/users/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "ymanshur",
+  "password": "secret123"
+}
