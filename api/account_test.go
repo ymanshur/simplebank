@@ -90,7 +90,7 @@ func TestServer_GetAccount(t *testing.T) {
 			testCase.buildStubs(store)
 
 			// start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 
 			recorder := httptest.NewRecorder()
 
