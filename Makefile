@@ -1,13 +1,13 @@
-DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+DB_URL=postgresql://postgres:postgres@localhost:5432/simplebank?sslmode=disable
 
 postgres:
 	docker run --name postgres10 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:10-alpine
 
 createdb:
-	docker exec -it postgres10 createdb --username=postgres --owner=postgres simple_bank
+	docker exec -it simplebank_postgres createdb --username=postgres --owner=postgres simplebank
 
 dropdb:
-	docker exec -it postgres10 dropdb simple_bank
+	docker exec -it simplebank_postgres dropdb simplebank
 
 migrateup:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up

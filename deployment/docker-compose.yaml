@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=simple_bank
+      - POSTGRES_DB=simplebank
   api:
     build:
       context: ../
@@ -16,7 +16,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://postgres:postgres@postgres:5432/simple_bank?sslmode=disable
+      - DB_SOURCE=postgresql://postgres:postgres@postgres:5432/simplebank?sslmode=disable
       - GIN_MODE=release
     depends_on:
       - postgres
