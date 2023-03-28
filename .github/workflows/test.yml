@@ -14,6 +14,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+
     services:
       postgres:
         # References: https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
@@ -29,6 +30,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - uses: actions/checkout@v3
 
