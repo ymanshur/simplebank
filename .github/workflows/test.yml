@@ -48,5 +48,8 @@ jobs:
       - name: Run database migrations
         run: make migrateup
 
+      - name: Tidy modules
+        run: go mod tidy
+
       - name: Test
         run: make test
