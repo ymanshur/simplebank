@@ -7,6 +7,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=simplebank
+    ports:
+      - "5432:5432"
   api:
     build:
       context: ../
@@ -20,5 +22,7 @@ services:
       - GIN_MODE=release
     depends_on:
       - postgres
-    entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ] # override entrypoint in Dockerfile
+#    links:
+#      - postgres
+    entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ] # override entrypoint in Dockerfile, wait-for is cover links purpose
     command: [ "/app/main" ]
