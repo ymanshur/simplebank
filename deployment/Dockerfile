@@ -3,6 +3,7 @@ FROM golang:1.19-alpine3.16 AS builder
 
 WORKDIR /app
 
+# Bundle app source
 COPY . .
 
 RUN go build -o main main.go
@@ -15,8 +16,8 @@ WORKDIR /app
 RUN apk add curl
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.0/migrate.linux-amd64.tar.gz | tar xvz
 
+# Bundle executable app and (files) dependencies
 COPY --from=builder /app/main .
-
 COPY app.env .
 COPY deployment/start.sh .
 COPY deployment/wait-for.sh .
