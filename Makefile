@@ -35,9 +35,7 @@ mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/ymanshur/simplebank/db/sqlc Store
 
 container:
-	docker compose -f deployment/docker-compose.yaml up -d --build
-
-release: container
+	docker compose -f docker-compose.yaml up -d --build
 
 # TOKEN_SYMMETRIC_KEY generator
 randhex64:

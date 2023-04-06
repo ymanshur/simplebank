@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   postgres:
-    container_name: simplebank_postgres
+    container_name: simplebank-postgres
     image: postgres:10-alpine
     environment:
       - POSTGRES_USER=postgres
@@ -11,9 +11,9 @@ services:
       - "5432:5432"
   api:
     build:
-      context: ../
+      context: .
       dockerfile: deployment/Dockerfile
-    container_name: simplebank_api
+    container_name: simplebank-api
     image: simplebank
     ports:
       - "8080:8080"
