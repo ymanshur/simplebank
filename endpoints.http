@@ -52,3 +52,12 @@ Content-Type: application/json
   "username": "ymanshur",
   "password": "secret123"
 }
+
+### Renew access token
+POST http://localhost:8080/tokens/renew_access
+Accept: */*
+Content-Type: application/json
+
+{
+  "refresh_token": "v2.local.Z-8U9DDUiDdsTM7sqezgbshmPcef8dio4t59NcdT14i0XFutvasl86Lj3tVgFsUsCdhpF1B8qOwbF4GE7uX96pQPAyhFmrJ85xSn3tetM8qLX4ieJ8Xrmmw__h_PtqprqP0DKbl8d5xH-xNtospa9WhuKikmenGOdI5z5Y7BHNwWaMtWJOHQz9-C8uUeGT62mdLaHXSRQZRxVRpMOTedfCH_O4xEpwbVya100HOfUNmkYbQ-fWki60Ff65MRGhfqdvIx97q-m44GTDR9oVSR.bnVsbA"
+}
