@@ -23,7 +23,7 @@ Authorization: Bearer {{accessToken}}
 ### Get a account by id
 GET http://localhost:8080/accounts/1
 Accept: */*
-Authorization: Bearer v2.local.y8fLCxTOvHLRaUT9GDHCWKy8R9ZMSdjFlRGzgELstgRDlrV2IMWPyAj_HV2XntrmpvjkTKSBsqxQT84tpQO6QbPzbVKZkv5fFez10f7myV4EeuljRDOta1ASEUpcJsRAUzx2Utnyp3_Uo5Teu7uKjkzZHGm8UpaVMeDTRPScfiI0cd2uo8C43yMNh4h_ZsSwqMQQEpvFsCiiH7gHIBXKUZmFe60CHgqxHzBa2YmQ7pvPTCUv5L9VNTU00g-G70FYhsi7jQYW.bnVsbA
+Authorization: Bearer {{accessToken}}
 
 ### List accounts
 GET http://localhost:8080/accounts?page_id=1&page_size=5
@@ -34,7 +34,7 @@ Authorization: Bearer {{accessToken}}
 POST http://localhost:8080/transfers
 Accept: */*
 Content-Type: application/json
-Authorization: Bearer v2.local.HeqbB55KCrBW-TnIzKoeifpUND6ej_rsVEfnat8XSM2I8WRPGjGtnHh4JnQdDKu9jgJbZ0PtX-7vb500PpBlIRjseTbZmL8Qsv7lE2d_4k3qWO31I4lerf4PXB1zfMr6L_vthN657O-OV-6L6nrxADJ-ZLb2i0RPiLBQB6iNfC2akGjjPiwjJdM8boHrTzaxoLijbz2Fsq-lO0YtH7IK2_EREhkXPjLK9wcf45Tpwevswl-8Nu96GIzH0eRgrdLVyVf6GEv7SMj8mFSRnKWHrA.bnVsbA
+Authorization: Bearer {{accessToken}}
 
 {
   "from_account_id": 4,
