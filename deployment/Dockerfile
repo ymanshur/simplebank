@@ -13,15 +13,15 @@ FROM alpine:3.16
 
 WORKDIR /app
 
-RUN apk add curl
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.0/migrate.linux-amd64.tar.gz | tar xvz
+#RUN apk add curl
+#RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.0/migrate.linux-amd64.tar.gz | tar xvz
 
 # Bundle executable app and (files) dependencies
 COPY --from=builder /app/main .
 COPY app.env .
 COPY deployment/start.sh .
 COPY deployment/wait-for.sh .
-COPY db/migration ./migration
+COPY db/migration ./db/migration
 
 RUN chmod +x start.sh
 RUN chmod +x wait-for.sh
