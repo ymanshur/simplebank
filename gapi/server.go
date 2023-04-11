@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+	"net/http"
 )
 
 // Server serves gRPC requests for our banking service.
@@ -49,4 +50,14 @@ func (server *Server) Start(address string) error {
 
 	log.Printf("start gRPC server at %s", listener.Addr().String())
 	return server.rpc.Serve(listener)
+}
+
+func (server *Server) StartGateway(address string, mux *http.ServeMux) error {
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatal("cannot create listener:", err)
+	}
+
+	log.Printf("start HTTP gateway server at %s", listener.Addr().String())
+	return http.Serve(listener, mux)
 }
