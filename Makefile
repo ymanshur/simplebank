@@ -70,5 +70,6 @@ proto:
     --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
     --grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
     --openapiv2_out=docs/swagger --openapiv2_opt=allow_merge=true,json_names_for_fields=false \
+    --experimental_allow_proto3_optional \
     proto/*.proto
 	statik -src=./docs/swagger -dest=./docs
