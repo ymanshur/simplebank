@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -10,11 +11,10 @@ import (
 	statikFS "github.com/rakyll/statik/fs"
 	"github.com/rs/zerolog"
 	"github.com/ymanshur/simplebank/api"
-	"github.com/ymanshur/simplebank/db"
 	"os"
 
 	"github.com/rs/zerolog/log"
-	sqlc "github.com/ymanshur/simplebank/db/sqlc"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	_ "github.com/ymanshur/simplebank/docs/statik"
 	"github.com/ymanshur/simplebank/gapi"
 	"github.com/ymanshur/simplebank/pb"
@@ -38,18 +38,28 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot connect to db:")
 	}
 
-	err = db.RunMigration(config.MigrationURL, config.DBSource)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to run database migration")
-	}
+	runDBMigration(config.MigrationURL, config.DBSource)
 
-	store := sqlc.NewStore(conn)
+	store := db.NewStore(conn)
 
 	go runGatewayServer(config, store)
 	runGrpcServer(config, store)
 }
 
-func runGrpcServer(config util.Config, store sqlc.Store) {
+func runDBMigration(migrationURL string, dbSource string) {
+	migration, err := migrate.New(migrationURL, dbSource)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create new migrate instance")
+	}
+
+	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal().Err(err).Msg("failed to run migrate up")
+	}
+
+	log.Info().Msg("db migrated successfully")
+}
+
+func runGrpcServer(config util.Config, store db.Store) {
 	server, err := gapi.NewServer(config, store)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create gRPC server")
@@ -61,7 +71,7 @@ func runGrpcServer(config util.Config, store sqlc.Store) {
 	}
 }
 
-func runGatewayServer(config util.Config, store sqlc.Store) {
+func runGatewayServer(config util.Config, store db.Store) {
 	server, err := gapi.NewServer(config, store)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
@@ -106,7 +116,7 @@ func runGatewayServer(config util.Config, store sqlc.Store) {
 	}
 }
 
-func runGinServer(config util.Config, store sqlc.Store) {
+func runGinServer(config util.Config, store db.Store) {
 	server, err := api.NewServer(config, store)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create HTTP server")
