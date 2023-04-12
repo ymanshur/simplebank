@@ -35,7 +35,8 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		tokenMaker: tokenMaker,
 	}
 
-	server.rpc = grpc.NewServer()
+	grpcLogger := grpc.UnaryInterceptor(GrpcLogger)
+	server.rpc = grpc.NewServer(grpcLogger)
 	pb.RegisterSimpleBankServer(server.rpc, server)
 	reflection.Register(server.rpc)
 
