@@ -7,6 +7,7 @@ import (
 	"github.com/ymanshur/simplebank/pb"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/pkg/worker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
@@ -16,23 +17,25 @@ import (
 // Server serves gRPC requests for our banking service.
 type Server struct {
 	pb.UnimplementedSimpleBankServer
-	config     util.Config
-	store      db.Store
-	tokenMaker token.Maker
-	rpc        *grpc.Server
+	config          util.Config
+	store           db.Store
+	tokenMaker      token.Maker
+	rpc             *grpc.Server
+	taskDistributor worker.TaskDistributor
 }
 
 // NewServer creates a new gRPC server.
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 
 	server := &Server{
-		config:     config,
-		store:      store,
-		tokenMaker: tokenMaker,
+		config:          config,
+		store:           store,
+		tokenMaker:      tokenMaker,
+		taskDistributor: taskDistributor,
 	}
 
 	grpcLogger := grpc.UnaryInterceptor(GrpcLogger)
