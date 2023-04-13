@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/hibiken/asynq"
@@ -49,9 +48,11 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 
 	user, err := processor.store.GetUser(ctx, payload.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return fmt.Errorf("user doesn't exist: %w", asynq.SkipRetry)
-		}
+		// Make compensation if DB transaction need more than
+		// the time processor takes the task
+		//if err == sql.ErrNoRows {
+		//	return fmt.Errorf("user doesn't exist: %w", asynq.SkipRetry)
+		//}
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
