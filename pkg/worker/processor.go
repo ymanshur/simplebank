@@ -1,12 +1,14 @@
 package worker
 
 import (
+	"context"
 	"github.com/hibiken/asynq"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 )
 
 type TaskProcessor interface {
 	Start() error
+	ProcessTaskSendVerifyEmail(ctx context.Context, task *asynq.Task) error
 }
 
 type RedisTaskProcessor struct {
