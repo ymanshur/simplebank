@@ -73,3 +73,11 @@ proto:
     --experimental_allow_proto3_optional \
     proto/*.proto
 	statik -src=./docs/swagger -dest=./docs
+
+.PHONY: redis
+redis:
+	docker run --name redis -p 6379:6379 -d redis:7-alpine
+
+.PHONY: ping-redis
+ping-redis:
+	docker exec -it redis redis-cli ping
