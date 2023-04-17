@@ -29,6 +29,10 @@ migratedown:
 migratedown1:
 	migrate -path db/migration -database "$(DB_URL)" -verbose down 1
 
+.PHONY: new_migration
+new_migration:
+	migrate create -ext sql -dir db/migration -seq $(name)
+
 .PHONY: sqlc
 sqlc:
 	sqlc generate

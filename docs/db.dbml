@@ -10,9 +10,20 @@ Table users  {
   username varchar [pk]
   full_name varchar [not null]
   email varchar [not null, unique]
+  is_email_verified bool [not null, default: false]
   hashed_password varchar [not null]
   password_changed_at timestamptz [not null, default: '0001-01-01 00:00:00Z']
   created_at timestamptz [not null, default: `now()`]
+}
+
+Table verify_emails {
+  id bigserial [pk]
+  username varchar [ref: > U.username, not null]
+  email varchar [not null]
+  secret_code varchar [not null]
+  is_used bool [not null, default: false]
+  created_at timestamptz [not null, default: `now()`]
+  expired_at timestamptz [not null, default: `now() + interval '15 minutes'`]
 }
 
 Table sessions {
