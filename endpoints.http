@@ -1,5 +1,5 @@
 ### Create a user
-POST http://localhost:8080/users
+POST http://{{authority}}/users HTTP/1.1
 Accept: */*
 Content-Type: application/json
 
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### Create an account
-POST http://localhost:8080/accounts
+POST http://{{authority}}/accounts
 Accept: */*
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -21,17 +21,19 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Get an account by id
-GET http://localhost:8080/accounts/1
+GET http://{{authority}}/accounts/1
 Accept: */*
 Authorization: Bearer {{accessToken}}
 
 ### List accounts
-GET http://localhost:8080/accounts?page_id=1&page_size=5
+GET http://{{authority}}/accounts
+    ?page_id=1
+    &page_size=5
 Accept: */*
 Authorization: Bearer {{accessToken}}
 
 ### Transfer money
-POST http://localhost:8080/transfers
+POST http://{{authority}}/transfers
 Accept: */*
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -44,7 +46,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Login user
-POST http://localhost:8080/users/login
+POST http://{{authority}}/users/login
 Accept: */*
 Content-Type: application/json
 
@@ -54,7 +56,7 @@ Content-Type: application/json
 }
 
 ### Renew access token
-POST http://localhost:8080/tokens/renew_access
+POST http://{{authority}}/tokens/renew_access
 Accept: */*
 Content-Type: application/json
 
