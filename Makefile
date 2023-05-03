@@ -1,17 +1,19 @@
 DB_URL=postgresql://postgres:postgres@localhost:5432/simplebank?sslmode=disable
 #DB_URL=postgresql://postgres:3ail1lQcOm37MhCOBmoU@simplebank.cr6urtxwxgp1.ap-southeast-2.rds.amazonaws.com:5432/simplebank
 
+PG_VERSION ?= 10
+
 .PHONY: postgres
 postgres:
-	docker run --name postgres10 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d postgres:10-alpine
+	docker run --name postgres${PG_VERSION} -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres:${PG_VERSION}-alpine
 
 .PHONY: createdb
 createdb:
-	docker exec -it simplebank_postgres createdb --username=postgres --owner=postgres simplebank
+	docker exec -it simplebank-postgres createdb --username=postgres --owner=postgres simplebank
 
 .PHONY: dropdb
 dropdb:
-	docker exec -it simplebank_postgres dropdb simplebank
+	docker exec -it simplebank-postgres dropdb simplebank
 
 .PHONY: migrateup
 migrateup:
@@ -32,6 +34,9 @@ migratedown1:
 .PHONY: new_migration
 new_migration:
 	migrate create -ext sql -dir db/migration -seq $(name)
+
+db_schema:
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
 
 .PHONY: sqlc
 sqlc:
@@ -61,10 +66,6 @@ randhex64:
 .PHONY: login-container-registry
 login-container-registry:
 	aws ecr get-login-password | docker login --username AWS --password-stdin 009238256455.dkr.ecr.ap-southeast-2.amazonaws.com
-
-.PHONY: db_docs
-db_docs:
-	dbdocs build docs/db.dbml
 
 .PHONY: proto
 proto:
