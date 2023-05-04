@@ -1,5 +1,5 @@
 ### Create a user
-POST http://localhost:8080/users
+POST http://{{authority}}/users HTTP/1.1
 Accept: */*
 Content-Type: application/json
 
@@ -10,8 +10,8 @@ Content-Type: application/json
   "password": "secret123"
 }
 
-### Create a account
-POST http://localhost:8080/accounts
+### Create an account
+POST http://{{authority}}/accounts
 Accept: */*
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -20,21 +20,23 @@ Authorization: Bearer {{accessToken}}
   "currency": "USD"
 }
 
-### Get a account by id
-GET http://localhost:8080/accounts/1
+### Get an account by id
+GET http://{{authority}}/accounts/1
 Accept: */*
-Authorization: Bearer v2.local.y8fLCxTOvHLRaUT9GDHCWKy8R9ZMSdjFlRGzgELstgRDlrV2IMWPyAj_HV2XntrmpvjkTKSBsqxQT84tpQO6QbPzbVKZkv5fFez10f7myV4EeuljRDOta1ASEUpcJsRAUzx2Utnyp3_Uo5Teu7uKjkzZHGm8UpaVMeDTRPScfiI0cd2uo8C43yMNh4h_ZsSwqMQQEpvFsCiiH7gHIBXKUZmFe60CHgqxHzBa2YmQ7pvPTCUv5L9VNTU00g-G70FYhsi7jQYW.bnVsbA
+Authorization: Bearer {{accessToken}}
 
 ### List accounts
-GET http://localhost:8080/accounts?page_id=1&page_size=5
+GET http://{{authority}}/accounts
+    ?page_id=1
+    &page_size=5
 Accept: */*
 Authorization: Bearer {{accessToken}}
 
 ### Transfer money
-POST http://localhost:8080/transfers
+POST http://{{authority}}/transfers
 Accept: */*
 Content-Type: application/json
-Authorization: Bearer v2.local.HeqbB55KCrBW-TnIzKoeifpUND6ej_rsVEfnat8XSM2I8WRPGjGtnHh4JnQdDKu9jgJbZ0PtX-7vb500PpBlIRjseTbZmL8Qsv7lE2d_4k3qWO31I4lerf4PXB1zfMr6L_vthN657O-OV-6L6nrxADJ-ZLb2i0RPiLBQB6iNfC2akGjjPiwjJdM8boHrTzaxoLijbz2Fsq-lO0YtH7IK2_EREhkXPjLK9wcf45Tpwevswl-8Nu96GIzH0eRgrdLVyVf6GEv7SMj8mFSRnKWHrA.bnVsbA
+Authorization: Bearer {{accessToken}}
 
 {
   "from_account_id": 4,
@@ -43,12 +45,21 @@ Authorization: Bearer v2.local.HeqbB55KCrBW-TnIzKoeifpUND6ej_rsVEfnat8XSM2I8WRPG
   "currency": "USD"
 }
 
-### Login
-POST http://localhost:8080/users/login
+### Login user
+POST http://{{authority}}/users/login
 Accept: */*
 Content-Type: application/json
 
 {
   "username": "ymanshur",
   "password": "secret123"
+}
+
+### Renew access token
+POST http://{{authority}}/tokens/renew_access
+Accept: */*
+Content-Type: application/json
+
+{
+  "refresh_token": "v2.local.Z-8U9DDUiDdsTM7sqezgbshmPcef8dio4t59NcdT14i0XFutvasl86Lj3tVgFsUsCdhpF1B8qOwbF4GE7uX96pQPAyhFmrJ85xSn3tetM8qLX4ieJ8Xrmmw__h_PtqprqP0DKbl8d5xH-xNtospa9WhuKikmenGOdI5z5Y7BHNwWaMtWJOHQz9-C8uUeGT62mdLaHXSRQZRxVRpMOTedfCH_O4xEpwbVya100HOfUNmkYbQ-fWki60Ff65MRGhfqdvIx97q-m44GTDR9oVSR.bnVsbA"
 }

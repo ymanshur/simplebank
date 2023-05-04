@@ -2,20 +2,21 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"github.com/stretchr/testify/require"
-	util2 "github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/pkg/util"
 	"testing"
 	"time"
 )
 
 func createRandomUser(t *testing.T) User {
-	hashedPassword, err := util2.HashPassword(util2.RandomString(8))
+	hashedPassword, err := util.HashPassword(util.RandomString(8))
 	require.NoError(t, err)
 
 	arg := CreateUserParams{
-		Username:       util2.RandomOwner(),
-		FullName:       util2.RandomOwner(),
-		Email:          util2.RandomEmail(),
+		Username:       util.RandomOwner(),
+		FullName:       util.RandomOwner(),
+		Email:          util.RandomEmail(),
 		HashedPassword: hashedPassword,
 	}
 
@@ -50,4 +51,23 @@ func TestQueries_GetUser(t *testing.T) {
 	require.Equal(t, user1.HashedPassword, user2.HashedPassword)
 	require.WithinDuration(t, user1.PasswordChangedAt, user2.PasswordChangedAt, time.Second)
 	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
+}
+
+func TestQueries_UpdateUser_FullName(t *testing.T) {
+	oldUser := createRandomUser(t)
+
+	newFullName := util.RandomOwner()
+	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+		Username: oldUser.Username,
+		FullName: sql.NullString{
+			String: newFullName,
+			Valid:  true,
+		},
+	})
+
+	require.NoError(t, err)
+	require.NotEqual(t, oldUser.FullName, updatedUser.FullName)
+	require.Equal(t, newFullName, updatedUser.FullName)
+	require.Equal(t, oldUser.Email, updatedUser.Email)
+	require.Equal(t, oldUser.HashedPassword, updatedUser.HashedPassword)
 }
