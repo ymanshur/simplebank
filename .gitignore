@@ -1,3 +1,4 @@
 .idea
-*private.env*
 .vscode
+*private.env*
+app.env
