@@ -5,26 +5,31 @@ name: CI Test
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
-
   test:
     name: Test
     runs-on: ubuntu-latest
 
     services:
+      # References: https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
       postgres:
-        # References: https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
-        image: postgres:10-alpine
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: simplebank
+        image: postgres:12-alpine
         ports:
           - 5432:5432
+
+        # Provide the default PostgreSQL password
+        env:
+          POSTGRES_PASSWORD: postgres
+
         # Set health checks to wait until postgres has started
+        #
+        # TODO: Enable sslmode is necessary for sercure communication
+        # especially when the database is hosted remotely,
+        # while it is not strictly for a local instance
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
