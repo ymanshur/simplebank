@@ -1,6 +1,8 @@
-package db // TransferTxParams contains the input parameters of the transfer transaction
+package db
+
 import "context"
 
+// TransferTxParams contains the input parameters of the transfer transaction.
 type TransferTxParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
@@ -17,8 +19,9 @@ type TransferTxResult struct {
 }
 
 // TransferTx performs a money transfer from one account to the other.
-// It creates a transfer record, add account entries, and update account's balance within a single database transaction
+// It creates a transfer record, add account entries, and update account's balance within a single database transaction.
 func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+	// TODO: Use generic type to return the callback function result instead of function closure.
 	var result TransferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
