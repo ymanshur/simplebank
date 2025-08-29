@@ -21,9 +21,10 @@ jobs:
         ports:
           - 5432:5432
 
-        # Provide the default PostgreSQL password
+        # Provide the default PostgreSQL password and database name
         env:
           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: simplebank
 
         # Set health checks to wait until postgres has started
         options: >-
@@ -59,4 +60,4 @@ jobs:
         # while it is not strictly for a local instance
         env:
           DB_DRIVER: postgres
-          DB_SOURCE: postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable
+          DB_SOURCE: postgresql://postgres:postgres@localhost:5432/simplebank?sslmode=disable

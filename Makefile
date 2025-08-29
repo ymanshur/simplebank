@@ -2,7 +2,7 @@ POSTGRES_VERSION?=12
 POSTGRES_USER?=postgres
 POSTGRES_PASSWORD?=postgres
 
-DB_NAME?=postgres
+DB_NAME?=simplebank
 DB_HOST?=localhost
 DB_PORT?=5432
 DB_SSL?=disable
