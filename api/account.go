@@ -3,11 +3,12 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"net/http"
 )
 
 type createAccountRequest struct {
@@ -69,8 +70,8 @@ func (server *Server) getAccount(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if account.Owner != authPayload.Username {
-		err = errors.New("account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		err = errors.New("account doesn't belong to the authorized user")
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
 		return
 	}
 
