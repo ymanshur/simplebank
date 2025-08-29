@@ -18,10 +18,10 @@ FOR NO KEY UPDATE;
 
 -- name: ListAccounts :many
 SELECT * FROM accounts
-WHERE owner = $1
+WHERE owner = COALESCE(sqlc.narg(owner), owner)
 ORDER BY id
-LIMIT $2
-OFFSET $3;
+LIMIT sqlc.arg('limit')
+OFFSET sqlc.arg('offset');
 
 -- name: UpdateAccount :one
 UPDATE accounts
