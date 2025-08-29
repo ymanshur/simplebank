@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
@@ -68,9 +69,9 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 	}
 
 	subject := "Welcome to Simple Bank"
-	// TODO: replace this URL with an environment variable that points to a front-end page
-	verifyUrl := fmt.Sprintf("http://localhost:8080/verify_email?email_id=%d&secret_code=%s",
-		verifyEmail.ID, verifyEmail.SecretCode)
+	// TODO: replace gRPC Gateway URL with an environment variable that points to a front-end page
+	verifyUrl := fmt.Sprintf("http://%s/v1/verify_email?email_id=%d&secret_code=%s",
+		processor.config.GRPCGatewayServerAddress, verifyEmail.ID, verifyEmail.SecretCode)
 	content := fmt.Sprintf(`Hello %s,<br/>
 	Thank you for registering with us!<br/>
 	Please <a href="%s">click here</a> to verify your email address.<br/>
