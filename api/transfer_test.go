@@ -3,6 +3,11 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -10,10 +15,6 @@ import (
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func TestServer_Transfer(t *testing.T) {
@@ -124,7 +125,7 @@ func TestServer_Transfer(t *testing.T) {
 			data, err := json.Marshal(testCase.body)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/transfers", bytes.NewReader(data))
+			request := httptest.NewRequest(http.MethodPost, "/v1/transfers", bytes.NewReader(data))
 
 			testCase.setupAuth(t, request, server.tokenMaker)
 
