@@ -40,7 +40,7 @@ func validateFullName(value string) error {
 }
 
 func validatePassword(value string) error {
-	return validateString(value, 6, 100)
+	return validateString(value, 8, 100)
 }
 
 func validateEmail(value string) error {
