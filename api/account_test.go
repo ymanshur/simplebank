@@ -5,17 +5,18 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func TestServer_GetAccount(t *testing.T) {
@@ -110,7 +111,7 @@ func TestServer_GetAccount(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 
-			requestTarget := fmt.Sprintf("/accounts/%d", testCase.accountID)
+			requestTarget := fmt.Sprintf("/v/accounts/%d", testCase.accountID)
 			request := httptest.NewRequest(http.MethodGet, requestTarget, nil)
 
 			testCase.setupAuth(t, request, server.tokenMaker)
