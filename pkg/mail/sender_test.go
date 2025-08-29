@@ -1,8 +1,9 @@
 package mail
 
 import (
-	"github.com/ymanshur/simplebank/pkg/util"
 	"testing"
+
+	"github.com/ymanshur/simplebank/pkg/util"
 
 	"github.com/stretchr/testify/require"
 )
@@ -22,8 +23,8 @@ func TestSendEmail_WithGmail(t *testing.T) {
 	<h1>Hello world</h1>
 	<p>This is a test message from <a href="#">Simple Bank API</a></p>
 	`
-	to := []string{"yusuf.manshur@privy.id"}
-	var attachFiles []string
+	to := []string{"ymanshur928@gmail.com"}
+	attachFiles := []string{"../../README.md"}
 
 	err = sender.SendEmail(subject, content, to, nil, nil, attachFiles)
 	require.NoError(t, err)
