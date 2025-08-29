@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -10,11 +11,11 @@ import (
 	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
 	statikFS "github.com/rakyll/statik/fs"
-	"github.com/rs/zerolog"
 	"github.com/ymanshur/simplebank/api"
 	"github.com/ymanshur/simplebank/pkg/mail"
 	"github.com/ymanshur/simplebank/pkg/worker"
-	"os"
+
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
@@ -23,7 +24,6 @@ import (
 	"github.com/ymanshur/simplebank/pb"
 	"github.com/ymanshur/simplebank/pkg/util"
 	"google.golang.org/protobuf/encoding/protojson"
-	"net/http"
 )
 
 func main() {
@@ -32,16 +32,12 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
-	if config.Debug {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	}
-
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot connect to db:")
 	}
 
-	runDBMigration(config.MigrationURL, config.DBSource)
+	runDBMigration(config.DBMigrationURL, config.DBSource)
 
 	store := db.NewStore(conn)
 
@@ -52,8 +48,8 @@ func main() {
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
 	go runTaskProcessor(config, redisOpt, store)
-	go runGatewayServer(config, store, taskDistributor)
-	runGrpcServer(config, store, taskDistributor)
+	go runGrpcServer(config, store, taskDistributor)
+	runGrpcGatewayServer(config, store, taskDistributor)
 }
 
 func runDBMigration(migrationURL string, dbSource string) {
@@ -93,7 +89,7 @@ func runGrpcServer(config util.Config, store db.Store, taskDistributor worker.Ta
 	}
 }
 
-func runGatewayServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+func runGrpcGatewayServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
 	server, err := gapi.NewServer(config, store, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
@@ -132,7 +128,7 @@ func runGatewayServer(config util.Config, store db.Store, taskDistributor worker
 	swaggerHandler := http.StripPrefix("/swagger/", http.FileServer(fs))
 	mux.Handle("/swagger/", swaggerHandler)
 
-	err = server.StartGateway(config.HTTPServerAddress, mux)
+	err = server.StartGateway(config.GRPCGatewayServerAddress, mux)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot start HTTP gateway server")
 	}
