@@ -5,18 +5,19 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"testing"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
-	util2 "github.com/ymanshur/simplebank/pkg/util"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"reflect"
-	"testing"
+	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 // eqCreateUserParamsMatcher is used to represent the valid or expected arguments to createUser method.
@@ -31,7 +32,7 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	err := util2.CheckPassword(e.password, arg.HashedPassword)
+	err := util.CheckPassword(e.password, arg.HashedPassword)
 	if err != nil {
 		return false
 	}
@@ -321,15 +322,15 @@ func TestServer_LoginUser(t *testing.T) {
 
 // randomUser generate random user instance
 func randomUser(t *testing.T) (user db.User, password string) {
-	password = util2.RandomString(8)
-	hashedPassword, err := util2.HashPassword(password)
+	password = util.RandomString(8)
+	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
 	user = db.User{
-		Username:       util2.RandomOwner(),
+		Username:       util.RandomOwner(),
 		HashedPassword: hashedPassword,
-		FullName:       util2.RandomOwner(),
-		Email:          util2.RandomEmail(),
+		FullName:       util.RandomOwner(),
+		Email:          util.RandomEmail(),
 	}
 	return
 }
