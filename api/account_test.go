@@ -111,7 +111,7 @@ func TestServer_GetAccount(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 
-			requestTarget := fmt.Sprintf("/v/accounts/%d", testCase.accountID)
+			requestTarget := fmt.Sprintf("/v1/accounts/%d", testCase.accountID)
 			request := httptest.NewRequest(http.MethodGet, requestTarget, nil)
 
 			testCase.setupAuth(t, request, server.tokenMaker)

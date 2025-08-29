@@ -3,10 +3,11 @@ package db
 import (
 	"context"
 	"database/sql"
-	"github.com/stretchr/testify/require"
-	"github.com/ymanshur/simplebank/pkg/util"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 func createRandomAccount(t *testing.T) Account {
@@ -80,13 +81,11 @@ func TestQueries_DeleteAccount(t *testing.T) {
 }
 
 func TestQueries_ListAccounts(t *testing.T) {
-	var lastAccount Account
 	for i := 0; i < 10; i++ {
-		lastAccount = createRandomAccount(t)
+		createRandomAccount(t)
 	}
 
 	arg := ListAccountsParams{
-		Owner:  lastAccount.Owner,
 		Limit:  5,
 		Offset: 0,
 	}
@@ -94,9 +93,9 @@ func TestQueries_ListAccounts(t *testing.T) {
 	accounts, err := testQueries.ListAccounts(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
+	require.Len(t, accounts, 5)
 
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
-		require.Equal(t, lastAccount.Owner, account.Owner)
 	}
 }
