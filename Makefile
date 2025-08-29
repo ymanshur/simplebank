@@ -78,7 +78,7 @@ proto:
 	statik -src=./docs/swagger -dest=./docs
 
 redis:
-	docker run --name redis7 -p 6379:6379 -d redis:7-alpine
+	docker run --name redis8 -p 6379:6379 -d redis:8-alpine
 
 redis-ping:
 	docker exec -it redis redis-cli ping
