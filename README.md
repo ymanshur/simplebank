@@ -1,155 +1,206 @@
-## Simple bank service
+# Simple Bank Service
 
-The service that we’re going to build is a simple bank. It will provide APIs for the frontend to do following things:
+[![CI Test](https://github.com/ymanshur/simplebank/actions/workflows/test.yml/badge.svg)](https://github.com/ymanshur/simplebank/actions/workflows/test.yml)
+
+Simple Bank Service is perhaps the first project I've undertaken outside of my primary professional focus.
+
+I am committed to maintaining this repository as a resource for my professional development in Go. It is my intention that this repository will serve as a valuable asset for anyone seeking to learn how to develop robust software products using Go best practices.
+
+Thank you for watch!
+
+## About
+
+The service that I'm going to build is a simple bank. It will provide APIs for the frontend to do following things:
 
 1. Create and manage bank accounts, which are composed of owner’s name, balance, and currency.
 2. Record all balance changes to each of the account. So every time some money is added to or subtracted from the account, an account entry record will be created.
 3. Perform a money transfer between 2 accounts. This should happen within a transaction, so that either both account's balance are updated successfully or none of them are.
 
-## Setup local development
+TODO features including:
 
-### Install tools
+1. Top-up a balance account through a payment gateway such as Midtrans.
+2. Release the balance from an account in booking-action schema.
 
-- [Docker desktop](https://www.docker.com/products/docker-desktop)
-- [TablePlus](https://tableplus.com/)
-- [Golang](https://golang.org/)
-- [Homebrew](https://brew.sh/)
-- [Migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
+## Running the Service
 
-  ```bash
-  brew install golang-migrate
-  ```
+1. Clone the repository
 
-- [DB Docs](https://dbdocs.io/docs)
+    ```shell
+    git clone https://github.com/ymanshur/simplebank.git
+    ```
 
-  ```bash
-  npm install -g dbdocs
-  dbdocs login
-  ```
+2. [Dependencies installation](#dependencies)
+3. [Setup infrastructure](#setup-infrastructure)
+4. [Run and test your services](#run-your-servies-in-local-machine)
+
+### Dependencies
+
+- [Go](https://golang.org/) v1.19
+- [Migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate) is database migrations written in Go
+
+    ```shell
+    # Go 1.16+
+    # Unversioned installation
+    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+    ```
+
+- [SQL Compiler](https://docs.sqlc.dev/en/latest/overview/install.html) that generates type-safe code from SQL
+
+    ```shell
+    sudo snap install sqlc
+    ```
+
+- [GoMock](https://github.com/golang/mock) is a mocking framework for the Go programming language
+
+    ```shell
+    go install github.com/golang/mock/mockgen@v1.6.0
+    ```
+
+  Alternatively, use a [maintained fork](https://github.com/uber-go/mock?tab=readme-ov-file#installation) instead
+
+    ```shell
+    go install go.uber.org/mock/mockgen@latest
+    mockgen -version
+    ```
+
+- [DB Docs](https://dbdocs.io/docs) is a simple tool to create web-based documentation for your database.
+
+    ```shell
+    npm install -g dbdocs
+    dbdocs login
+    ```
 
 - [DBML CLI](https://www.dbml.org/cli/#installation)
 
-  ```bash
-  npm install -g @dbml/cli
-  dbml2sql --version
-  ```
+    DBML (Database Markup Language) is an open-source DSL language designed to define and document database schemas and structures.
 
-- [Sqlc](https://github.com/kyleconroy/sqlc#installation)
+    ```shell
+    npm install -g @dbml/cli
+    ```
 
-  ```bash
-  brew install sqlc
-  ```
+    `dbml2sql` is used to convert a DBML file to SQL
 
-- [Gomock](https://github.com/golang/mock)
-
-  ```bash
-  go install github.com/golang/mock/mockgen@v1.6.0
-  ```
+    ```shell
+    dbml2sql --version
+    ```
 
 ### Setup infrastructure
 
-- Create the bank-network
+Start database PostgreSQL container service:
 
-  ```bash
-  make network
-  ```
+```shell
+make postgres
+```
 
-- Start postgres container:
+Create `simplebank` database:
 
-  ```bash
-  make postgres
-  ```
+```shell
+make createdb
+```
 
-- Create simple_bank database:
+Run db migration up all versions:
 
-  ```bash
-  make createdb
-  ```
+```shell
+make migrateup
+```
 
-- Run db migration up all versions:
+Run db migration down all versions:
 
-  ```bash
-  make migrateup
-  ```
+```shell
+make migratedown
+```
 
-- Run db migration up 1 version:
+### Run your servies in local machine
 
-  ```bash
-  make migrateup1
-  ```
+```shell
+make server
+```
 
-- Run db migration down all versions:
+Test your services:
 
-  ```bash
-  make migratedown
-  ```
+```shell
+make test
+```
 
-- Run db migration down 1 version:
+## Documentation
 
-  ```bash
-  make migratedown1
-  ```
+### Database
 
-### Documentation
+1. Update your database design in docs/db.dbml
+2. Build DB documentation:
 
-- Generate DB documentation:
+    ```shell
+    make dbdocs
+    ```
 
-  ```bash
-  make db_docs
-  ```
+You can access my DB documentation for this project at [this address](https://dbdocs.io/ymanshur/simplebank)
 
-- Access the DB documentation at [this address](https://dbdocs.io/techschool.guru/simple_bank). Password: `secret`
+### OpenAPI
 
-### How to generate code
+Open <http://localhost:8080/swagger> to see APIs documentation based on gRPC Gateway proto definition
 
-- Generate schema SQL file with DBML:
+## Code Generation
 
-  ```bash
-  make db_schema
-  ```
+Generate schema SQL file with DBML CLI:
 
-- Generate SQL CRUD with sqlc:
+```shell
+make dbschema
+```
 
-  ```bash
-  make sqlc
-  ```
+Generate SQL CRUD with `sqlc`:
 
-- Generate DB mock with gomock:
+```shell
+make sqlc
+```
 
-  ```bash
-  make mock
-  ```
+Generate DB mock with GoMock:
 
-- Create a new db migration:
+```shell
+make mock
+```
 
-  ```bash
-  make new_migration name=<migration_name>
-  ```
+Create a new DB migration:
 
-### How to run
+```shell
+make migratecreate name=<migration_name>
+```
 
-- Run server:
+Generate [protobuf](https://grpc.io/docs/languages/go/quickstart/#regenerate-grpc-code) files and update the [API documentation](#openapi)
 
-  ```bash
-  make server
-  ```
+```shell
+make proto
+```
 
-- Run test:
+## Tips
 
-  ```bash
-  make test
-  ```
+### How to hit the endpoint using endpoints.http as a plyaground
 
-## Deploy to kubernetes cluster
+1. Install [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension
+2. To control environment variables add following lines to .vscode/settings.json
 
-- [Install nginx ingress controller](https://kubernetes.github.io/ingress-nginx/deploy/#aws):
+    ```json
+    "rest-client.environmentVariables": {
+        "local": {
+            "authority": "localhost:8000",
+            "accessToken": "",
+            "refreshToken": ""
+        },
+    },
+    ```
 
-  ```bash
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.48.1/deploy/static/provider/aws/deploy.yaml
-  ```
+3. Copy the returning access and refresh token into environment variables
+4. Run the HTTP or Gateway server and follow REST Client documentation to [making request](https://github.com/Huachao/vscode-restclient?tab=readme-ov-file#making-request)
 
-- [Install cert-manager](https://cert-manager.io/docs/installation/kubernetes/):
+### Control Workspace environment variables
 
-  ```bash
-  kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.4.0/cert-manager.yaml
-  ```
+Add following line into .vscode/settings.json
+
+```json
+{
+    "terminal.integrated.env.linux": {
+        "POSTGRES_USER": "",
+        "POSTGRES_PASSWORD": "",
+        "DB_NAME": "simplebank"
+    }
+}
+```
