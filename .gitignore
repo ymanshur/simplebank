@@ -1,4 +1,16 @@
+# Binaries for programs and plugins
+simplebank
+
+# Dependency directories `go mod vendor` (remove the comment below to include it)
+# vendor/
+
+# IDE specific files and directories
 .idea
 .vscode
-*private.env*
+
+# Local environment variables
 app.env
+app.env.*
+
+# Log files
+*.log
