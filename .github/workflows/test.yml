@@ -26,10 +26,6 @@ jobs:
           POSTGRES_PASSWORD: postgres
 
         # Set health checks to wait until postgres has started
-        #
-        # TODO: Enable sslmode is necessary for sercure communication
-        # especially when the database is hosted remotely,
-        # while it is not strictly for a local instance
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -53,10 +49,14 @@ jobs:
       - name: Run database migrations
         run: make migrateup
 
-      - name: Create config file
-        run: |
-          echo 'DB_DRIVER=postgres' > app.env
-          echo 'DB_SOURCE=postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable' >> app.env
-
       - name: Test
         run: make test
+        # Environment variable used by the `make test` command to connect
+        # with the PostgreSQL service container
+        #
+        # TODO: Enable sslmode is necessary for sercure communication
+        # especially when the database is hosted remotely,
+        # while it is not strictly for a local instance
+        env:
+          DB_DRIVER: postgres
+          DB_SOURCE: postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable
