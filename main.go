@@ -11,6 +11,7 @@ import (
 	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
 	statikFS "github.com/rakyll/statik/fs"
+	"github.com/rs/zerolog"
 	"github.com/ymanshur/simplebank/api"
 	"github.com/ymanshur/simplebank/pkg/mail"
 	"github.com/ymanshur/simplebank/pkg/worker"
@@ -30,6 +31,10 @@ func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot load config")
+	}
+
+	if !config.Debug {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
