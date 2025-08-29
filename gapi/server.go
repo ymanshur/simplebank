@@ -2,6 +2,9 @@ package gapi
 
 import (
 	"fmt"
+	"net"
+	"net/http"
+
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pb"
@@ -10,12 +13,11 @@ import (
 	"github.com/ymanshur/simplebank/pkg/worker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"net"
-	"net/http"
 )
 
 // Server serves gRPC requests for our banking service.
 type Server struct {
+	// UnimplementedSimpleBankServer enable forward compatibility
 	pb.UnimplementedSimpleBankServer
 	config          util.Config
 	store           db.Store
@@ -41,6 +43,9 @@ func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDi
 	grpcLogger := grpc.UnaryInterceptor(GrpcLogger)
 	server.rpc = grpc.NewServer(grpcLogger)
 	pb.RegisterSimpleBankServer(server.rpc, server)
+
+	// Allows the gRPC client to explore available RPCs on the server
+	// as some kind of self server documentation.
 	reflection.Register(server.rpc)
 
 	return server, nil
