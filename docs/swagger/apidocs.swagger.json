@@ -121,7 +121,7 @@
         ]
       }
     },
-    "/verify_email": {
+    "/v1/verify_email": {
       "get": {
         "summary": "Verify email",
         "description": "Use this API to verify user's email address",
