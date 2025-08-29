@@ -191,7 +191,7 @@ func TestServer_CreateUser(t *testing.T) {
 			data, err := json.Marshal(testCase.body)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(data))
+			request := httptest.NewRequest(http.MethodPost, "/v1/users", bytes.NewReader(data))
 			server.router.ServeHTTP(recorder, request)
 
 			// check response
