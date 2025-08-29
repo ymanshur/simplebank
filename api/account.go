@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -91,6 +92,10 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.Username == "" {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("unknown user")))
+	}
 
 	var arg = db.ListAccountsParams{
 		Owner: sql.NullString{
