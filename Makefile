@@ -1,77 +1,72 @@
-DB_URL=postgresql://postgres:postgres@localhost:5432/simplebank?sslmode=disable
-#DB_URL=postgresql://postgres:3ail1lQcOm37MhCOBmoU@simplebank.cr6urtxwxgp1.ap-southeast-2.rds.amazonaws.com:5432/simplebank
+POSTGRES_VERSION?=10
+POSTGRES_USER?=postgres
+POSTGRES_PASSWORD?=postgres
 
-PG_VERSION ?= 10
+DB_NAME?=postgres
+DB_HOST?=localhost
+DB_PORT?=5432
+DB_SSL?=disable
 
-.PHONY: postgres
+DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL}
+
 postgres:
-	docker run --name postgres${PG_VERSION} -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres:${PG_VERSION}-alpine
+	docker run --name postgres${POSTGRES_VERSION} -p ${DB_PORT}:5432 -r POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
 
-.PHONY: createdb
 createdb:
-	docker exec -it simplebank-postgres createdb --username=postgres --owner=postgres simplebank
+	docker exec -it postgres${POSTGRES_VERSION} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${DB_NAME}
 
-.PHONY: dropdb
 dropdb:
-	docker exec -it simplebank-postgres dropdb simplebank
+	docker exec -it postgres${POSTGRES_VERSION} dropdb ${DB_NAME}
 
-.PHONY: migrateup
 migrateup:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up
 
-.PHONY: migrateup1
 migrateup1:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up 1
 
-.PHONY: migratedown
 migratedown:
 	migrate -path db/migration -database "$(DB_URL)" -verbose down
 
-.PHONY: migratedown1
 migratedown1:
 	migrate -path db/migration -database "$(DB_URL)" -verbose down 1
 
-.PHONY: new_migration
-new_migration:
+migratecreate:
 	migrate create -ext sql -dir db/migration -seq $(name)
 
-db_schema:
+dbschema:
 	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
 
-.PHONY: sqlc
 sqlc:
 	sqlc generate
 
-.PHONY: test
 test:
 	go test -v -cover -short ./...
 
-.PHONY: server
 server:
+	clear
 	go run main.go
 
-.PHONY: mock
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/ymanshur/simplebank/db/sqlc Store
 
-.PHONY: container
 container:
 	docker compose -f docker-compose.yaml up -d --build
 
-.PHONY: randhex64
 # TOKEN_SYMMETRIC_KEY generator
 randhex64:
 	openssl rand -hex 64 | head -c $(head)
 
-.PHONY: login-container-registry
-login-container-registry:
+login-aws-ecr:
 	aws ecr get-login-password | docker login --username AWS --password-stdin 009238256455.dkr.ecr.ap-southeast-2.amazonaws.com
 
 .PHONY: proto
 proto:
 	rm -f pb/*.go
 	rm -f docs/swagger/*.swagger.json
-	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+	rm -f docs/statik/*
+	protoc \
+	--proto_path=proto \
+	--go_out=pb --go_opt=paths=source_relative \
     --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
     --grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
     --openapiv2_out=docs/swagger --openapiv2_opt=allow_merge=true,json_names_for_fields=false \
@@ -79,10 +74,8 @@ proto:
     proto/*.proto
 	statik -src=./docs/swagger -dest=./docs
 
-.PHONY: redis
 redis:
-	docker run --name redis -p 6379:6379 -d redis:7-alpine
+	docker run --name redis7 -p 6379:6379 -d redis:7-alpine
 
-.PHONY: ping-redis
-ping-redis:
+redis-ping:
 	docker exec -it redis redis-cli ping
