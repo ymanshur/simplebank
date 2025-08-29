@@ -33,6 +33,9 @@ migratedown1:
 migratecreate:
 	migrate create -ext sql -dir db/migration -seq $(name)
 
+dbdocs:
+	dbdocs build docs/db.dbml
+
 dbschema:
 	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
 
