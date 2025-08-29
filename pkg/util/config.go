@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"time"
 
 	"github.com/spf13/viper"
@@ -29,8 +28,6 @@ type Config struct {
 
 // LoadConfig reads configuration from file or environment variables.
 func LoadConfig(path string) (Config, error) {
-	var config Config
-
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env") // json, yml, etc.
@@ -38,13 +35,9 @@ func LoadConfig(path string) (Config, error) {
 	// AutomaticEnv will override config file
 	viper.AutomaticEnv()
 
+	var config Config
 	err := viper.ReadInConfig()
 	if err != nil {
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-		if errors.As(err, &configFileNotFoundError) {
-			return config, nil
-		}
-
 		return config, err
 	}
 
