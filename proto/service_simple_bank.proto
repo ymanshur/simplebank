@@ -26,7 +26,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service SimpleBank {
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
     option (google.api.http) = {
-      post: "/users"
+      post: "/v1/users"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -36,7 +36,7 @@ service SimpleBank {
   }
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {
     option (google.api.http) = {
-      patch: "/users"
+      patch: "/v1/users"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -46,7 +46,7 @@ service SimpleBank {
   }
   rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
     option (google.api.http) = {
-      post: "/users/login"
+      post: "/v1/login_user"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
