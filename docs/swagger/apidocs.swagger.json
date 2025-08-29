@@ -21,7 +21,41 @@
     "application/json"
   ],
   "paths": {
-    "/users": {
+    "/v1/login_user": {
+      "post": {
+        "summary": "Login user",
+        "description": "Use this API to login user and get access and refresh token",
+        "operationId": "SimpleBank_LoginUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbLoginUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbLoginUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SimpleBank"
+        ]
+      }
+    },
+    "/v1/users": {
       "post": {
         "summary": "Create a user",
         "description": "Use this API to create a new user",
@@ -79,40 +113,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/pbUpdateUserRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SimpleBank"
-        ]
-      }
-    },
-    "/users/login": {
-      "post": {
-        "summary": "Login user",
-        "description": "Use this API to login user and get access and refresh token",
-        "operationId": "SimpleBank_LoginUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbLoginUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbLoginUserRequest"
             }
           }
         ],
