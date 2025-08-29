@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -42,17 +43,18 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	router.POST("/users", server.createUser)
-	router.POST("/users/login", server.loginUser)
-	router.POST("/tokens/renew_access", server.renewAccessToken)
+	v1Routes := router.Group("/v1")
+	v1Routes.POST("/users", server.createUser)
+	v1Routes.POST("/login_user", server.loginUser)
+	v1Routes.POST("/renew_access_token", server.renewAccessToken)
 
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	v1AuthRoutes := v1Routes.Group("/").Use(authMiddleware(server.tokenMaker))
 
-	authRoutes.POST("/accounts", server.createAccount)
-	authRoutes.GET("/accounts/:id", server.getAccount)
-	authRoutes.GET("/accounts", server.listAccounts)
+	v1AuthRoutes.POST("/accounts", server.createAccount)
+	v1AuthRoutes.GET("/accounts/:id", server.getAccount)
+	v1AuthRoutes.GET("/accounts", server.listAccounts)
 
-	authRoutes.POST("/transfers", server.createTransfer)
+	v1AuthRoutes.POST("/transfers", server.createTransfer)
 
 	server.router = router
 }
