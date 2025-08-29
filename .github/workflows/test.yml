@@ -53,5 +53,10 @@ jobs:
       - name: Run database migrations
         run: make migrateup
 
+      - name: Create config file
+        run: |
+          echo 'DB_DRIVER=postgres' > app.env
+          echo 'DB_SOURCE=postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable' > app.env
+
       - name: Test
         run: make test
