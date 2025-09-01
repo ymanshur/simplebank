@@ -1,6 +1,6 @@
 module github.com/ymanshur/simplebank
 
-go 1.23.0
+go 1.24.6
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
