@@ -1,14 +1,23 @@
-version: "3.9"
 services:
   postgres:
     container_name: simplebank-postgres
-    image: postgres:10-alpine
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=simplebank
+    image: postgres:12-alpine
     ports:
       - "5432:5432"
+    networks:
+      - simplebank-net
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=simplebank
+
+  redis:
+    container_name: simplebank-redis
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - simplebank-net
+
   api:
     build:
       context: .
@@ -17,12 +26,32 @@ services:
     image: simplebank
     ports:
       - "8080:8080"
+      - "9090:9090"
+    networks:
+      - simplebank-net
+    env_file:
+      - app.env
+    # complete environment with appropoate environment variables
+    # to override app.env.example as default values
     environment:
+      - DEBUG=false
       - DB_SOURCE=postgresql://postgres:postgres@postgres:5432/simplebank?sslmode=disable
-      - GIN_MODE=release
+      - GRPC_GATEWAY_SERVER_ADDRESS=0.0.0.0:8080
+      - GRPC_SERVER_ADDRESS=0.0.0.0:9090
+      - REDIS_ADDRESS=redis:6379
     depends_on:
       - postgres
-#    links:
-#      - postgres
-    entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ] # override entrypoint in Dockerfile, wait-for is cover links purpose
+      - redis
+
+    # entrypoint will override ENTRYPOINT in Dockerfile,
+    # meaning that CMD will be ignored too
+    entrypoint: [
+      "/app/wait-for.sh", "postgres:5432", "--",
+      "/app/start.sh"
+    ]
     command: [ "/app/main" ]
+
+networks:
+  simplebank-net:
+      name: simplebank-net
+      external: false
