@@ -63,7 +63,7 @@ TODO features including:
     go install github.com/golang/mock/mockgen@v1.6.0
     ```
 
-  Alternatively, use a [maintained fork](https://github.com/uber-go/mock?tab=readme-ov-file#installation) instead
+    Alternatively, use a [maintained fork](https://github.com/uber-go/mock?tab=readme-ov-file#installation) instead
 
     ```shell
     go install go.uber.org/mock/mockgen@latest
@@ -129,16 +129,31 @@ Test your services:
 make test
 ```
 
+### Run your servies and the insfrastructures in Docker containers
+
+Following command will run [docker-compose.yaml](docker-compose.yaml) file
+
+```shell
+make containes
+```
+
+Alternatively, if you already create PostgreSQL dan Redis containers, you just have to run the following command to create only the application container
+
+```shell
+make run EMAIL_SENDER_ADDRESS=ymanshur@gmail.com EMAIL_SENDER_PASSWORD=***juc***yrs***f
+```
+
+Note: EMAIL_SENDER_ADDRESS and EMAIL_SENDER_PASSWORD are the environment variables that needed to create user
+
 ## Documentation
 
 ### Database
 
-1. Update your database design in docs/db.dbml
-2. Build DB documentation:
+Update your database design in [docs/db.dbml](docs/db.dbml) the build DB documentation:
 
-    ```shell
-    make dbdocs
-    ```
+```shell
+make dbdocs
+```
 
 You can access my DB documentation for this project at [this address](https://dbdocs.io/ymanshur/simplebank)
 
