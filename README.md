@@ -2,7 +2,7 @@
 
 [![CI Test](https://github.com/ymanshur/simplebank/actions/workflows/test.yml/badge.svg)](https://github.com/ymanshur/simplebank/actions/workflows/test.yml)
 
-Simple Bank Service is perhaps the first project I've undertaken outside of my primary professional focus.
+This repo is perhaps the first project I've undertaken outside of my primary professional focus.
 
 I am committed to maintaining this repository as a resource for my professional development in Go. It is my intention that this repository will serve as a valuable asset for anyone seeking to learn how to develop robust software products using Go best practices.
 
@@ -12,22 +12,111 @@ Thank you for watch!
 
 ## About
 
-The service that I'm going to build is a simple bank. It will provide APIs for the frontend to do following things:
+Simple Bank Service is a comprehensive banking API that provides secure account management, money transfers, and user authentication with email verification.
 
-1. Create and manage bank accounts, which are composed of owner’s name, balance, and currency.
-2. Record all balance changes to each of the account. So every time some money is added to or subtracted from the account, an account entry record will be created.
-3. Perform a money transfer between 2 accounts. This should happen within a transaction, so that either both account's balance are updated successfully or none of them are.
+**Key responsibilities:**
+
+- Create and manage bank accounts, which are composed of owner’s name, balance, and currency.
+- Record all balance changes to each of the account. So every time some money is added to or subtracted from the account, an account entry record will be created.
+- Perform a money transfer between 2 accounts. This should happen within a transaction, so that either both account's balance are updated successfully or none of them are.
+- Handle user registration, authentication, and email verification
 
 TODO features including:
 
 1. Top-up a balance account through a payment gateway such as Midtrans.
 2. Release the balance from an account in booking-action schema.
 
+## Architecture Overview
+
+### System Context
+
+![Simple Bank Architecture Diagram](assets/simple-bank-architecture.svg)
+
+### Key Components
+
+- **HTTP API Server (Gin)** - REST endpoints for web clients with JWT authentication
+- **gRPC Server** - High-performance API for service-to-service communication
+- **gRPC Gateway** - Translates HTTP requests to gRPC calls for unified API access
+- **Database Layer (SQLC)** - Type-safe SQL operations with transaction support
+- **Background Workers (Asynq)** - Asynchronous email processing and task management
+- **Token Management** - Dual support for JWT and PASETO tokens
+
+### Data Flow
+
+1. **Client Request** - HTTP request hits gRPC Gateway or direct gRPC call
+2. **Authentication** - Token validation using JWT/PASETO makers
+3. **Business Logic** - Request processed through appropriate handler (api/ or gapi/)
+4. **Database Operations** - SQLC-generated code executes type-safe SQL queries
+5. **Background Tasks** - Email verification and other async tasks queued to Redis
+6. **Response** - JSON response returned via HTTP or gRPC protocol
+
+## Project Structure
+
+```bash
+simplebank/
+├── api/                 # HTTP/REST API handlers (Gin framework)
+│   ├── server.go        # HTTP server setup and routing
+│   ├── account.go       # Account management endpoints
+│   ├── transfer.go      # Money transfer endpoints
+│   ├── user.go          # User management endpoints
+│   └── middleware.go    # Authentication middleware
+├── gapi/                # gRPC API handlers
+│   ├── server.go        # gRPC server setup
+│   ├── rpc_*.go         # Individual RPC method implementations
+│   └── converter.go     # Protocol buffer conversions
+├── db/                  # Database layer
+│   ├── migration/       # SQL migration files
+│   ├── query/           # SQL query definitions
+│   ├── sqlc/            # Generated type-safe Go code
+│   └── mock/            # Generated mock interfaces
+├── pkg/                 # Shared packages
+│   ├── token/           # JWT and PASETO token management
+│   ├── util/            # Configuration and utilities
+│   ├── worker/          # Background task processing
+│   └── mail/            # Email sending functionality
+├── proto/               # Protocol buffer definitions
+├── pb/                  # Generated protobuf Go code
+├── docs/                # API documentation and Swagger specs
+├── deployment/          # Docker configuration
+│   ├── Dockerfile       # Multi-stage build configuration
+│   └── start.sh         # Container startup script
+├── docker-compose.yaml  # Local development environment
+├── Makefile             # Build and development commands
+└── main.go              # Application entry point
+```
+
+## Technology Stack
+
+### Core Technologies
+
+- **Language:** Go (1.24.6) - Chosen for performance, concurrency, and strong typing
+- **HTTP Framework:** Gin - Fast HTTP web framework with middleware support
+- **gRPC Framework:** Google gRPC - High-performance RPC framework with Protocol Buffers
+- **Database:** PostgreSQL - ACID-compliant relational database for financial data
+- **Cache/Queue:** Redis - In-memory store for background task queuing
+
+### Key Libraries
+
+- **SQLC** - Generates type-safe Go code from SQL queries
+- **golang-migrate** - Database migration management
+- **Asynq** - Distributed task queue for background processing
+- **Viper** - Configuration management with environment variable support
+- **Zerolog** - Structured logging with JSON output
+- **Testify** - Testing toolkit with assertions and mocks
+
+### Development Tools
+
+- **GoMock** - Mock generation for testing
+- **Protocol Buffers** - API definition and code generation
+- **gRPC Gateway** - HTTP to gRPC translation layer
+- **Docker** - Containerization for development and deployment
+- **GitHub Actions** - Continuous integration and testing
+
 ## Running The Services
 
 1. Clone the repository
 
-    ```shell
+    ```bash
     git clone https://github.com/ymanshur/simplebank.git
     ```
 
@@ -40,7 +129,7 @@ TODO features including:
 - [Go](https://golang.org/) v1.23
 - [Migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate) is database migrations written in Go
 
-    ```shell
+    ```bash
     # Versioned installation
     mkdir -p $GOPATH/src/github.com/golang-migrate
     git clone github.com/golang-migrate/migrate $GOPATH/src/github.com/golang-migrate/
@@ -53,26 +142,26 @@ TODO features including:
 
 - [SQL Compiler](https://docs.sqlc.dev/en/latest/overview/install.html) that generates type-safe code from SQL
 
-    ```shell
+    ```bash
     sudo snap install sqlc
     ```
 
 - [GoMock](https://github.com/golang/mock) is a mocking framework for the Go programming language
 
-    ```shell
+    ```bash
     go install github.com/golang/mock/mockgen@v1.6.0
     ```
 
     Alternatively, use a [maintained fork](https://github.com/uber-go/mock?tab=readme-ov-file#installation) instead
 
-    ```shell
+    ```bash
     go install go.uber.org/mock/mockgen@latest
     mockgen -version
     ```
 
 - [DB Docs](https://dbdocs.io/docs) is a simple tool to create web-based documentation for your database.
 
-    ```shell
+    ```bash
     npm install -g dbdocs
     dbdocs login
     ```
@@ -81,13 +170,13 @@ TODO features including:
 
     DBML (Database Markup Language) is an open-source DSL language designed to define and document database schemas and structures.
 
-    ```shell
+    ```bash
     npm install -g @dbml/cli
     ```
 
     `dbml2sql` is used to convert a DBML file to SQL
 
-    ```shell
+    ```bash
     dbml2sql --version
     ```
 
@@ -95,37 +184,37 @@ TODO features including:
 
 Start database PostgreSQL container service:
 
-```shell
+```bash
 make postgres
 ```
 
 Create `simplebank` database:
 
-```shell
+```bash
 make createdb
 ```
 
 Run db migration up all versions:
 
-```shell
+```bash
 make migrateup
 ```
 
 Run db migration down all versions:
 
-```shell
+```bash
 make migratedown
 ```
 
 ### Run your servies in local machine
 
-```shell
+```bash
 make server
 ```
 
 Test your services:
 
-```shell
+```bash
 make test
 ```
 
@@ -133,13 +222,13 @@ make test
 
 Following command will run [docker-compose.yaml](docker-compose.yaml) file
 
-```shell
+```bash
 make containes
 ```
 
 Alternatively, if you already create PostgreSQL dan Redis containers, you just have to run the following command to create only the application container
 
-```shell
+```bash
 make run EMAIL_SENDER_ADDRESS=ymanshur@gmail.com EMAIL_SENDER_PASSWORD=***juc***yrs***f
 ```
 
@@ -151,7 +240,7 @@ Note: EMAIL_SENDER_ADDRESS and EMAIL_SENDER_PASSWORD are the environment variabl
 
 Update your database design in [docs/db.dbml](docs/db.dbml) the build DB documentation:
 
-```shell
+```bash
 make dbdocs
 ```
 
@@ -165,31 +254,31 @@ Open <http://localhost:8080/swagger> to see APIs documentation based on gRPC Gat
 
 Generate schema SQL file with DBML CLI:
 
-```shell
+```bash
 make dbschema
 ```
 
 Generate SQL CRUD with `sqlc`:
 
-```shell
+```bash
 make sqlc
 ```
 
 Generate DB mock with GoMock:
 
-```shell
+```bash
 make mock
 ```
 
 Create a new DB migration:
 
-```shell
+```bash
 make migratecreate name=<migration_name>
 ```
 
 Generate [protobuf](https://grpc.io/docs/languages/go/quickstart/#regenerate-grpc-code) files and update the [API documentation](#openapi)
 
-```shell
+```bash
 make proto
 ```
 
@@ -212,6 +301,8 @@ make proto
 
 3. Copy the returning access and refresh token into environment variables
 4. Run the HTTP or Gateway server and follow REST Client documentation to [making request](https://github.com/Huachao/vscode-restclient?tab=readme-ov-file#making-request)
+
+    ![REST Client Example](assets/rest-client-example-1.png)
 
 ### Control Workspace environment variables
 
