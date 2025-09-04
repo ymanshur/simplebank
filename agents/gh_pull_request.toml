@@ -1,0 +1,81 @@
+# agent.toml
+version = "1.0"
+
+[commands.create_pr]
+description = "Create a GitHub Pull Request from a local branch to a target branch"
+instructions = """
+The agent ensures the local 'from-branch' is up to date with the remote, pushes any behind commits,
+then creates a GitHub Pull Request into 'target-branch'. The PR description should:
+- Follow the template from .github/pull_request_template.md (if it exists)
+- Summarize changes from commit messages AND from 'git diff'
+- Focus only on the relative changes between branches (ignore the untracked files), not the entire history
+- Include relevant technical details about the project implementation
+- Reference any significant changes like database migrations, API modifications, or service updates
+"""
+
+arguments = [
+    { name = "from-branch", type = "string", required = true, description = "The source branch for the PR" },
+    { name = "target-branch", type = "string", required = true, description = "The target branch (e.g., master)" },
+]
+
+mcpServers = """
+{
+    "shell": {
+      "command": "uvx",
+      "args": [
+        "mcp-shell-server"
+      ],
+      "env": {
+        "ALLOW_COMMANDS": "git,gh,cat,ls,grep,head,tail,wc,find,diff",
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "uvx",
+      "args": [
+        "mcp-filesystem-server",
+        "."
+      ]
+    }
+}
+"""
+
+tools = ["filesystem", "git", "shell"]
+
+execution_strategy = "plan"
+
+output_schema = """
+{
+    "type": "object",
+    "properties": {
+        "success": {
+            "type": "boolean",
+            "description": "Whether the PR was created successfully"
+        },
+        "pull_request_url": {
+            "type": "string",
+            "description": "The URL of the created pull request"
+        },
+        "pull_request_number": {
+            "type": "integer",
+            "description": "The PR number assigned by GitHub"
+        },
+        "summary": {
+            "type": "string",
+            "description": "A brief summary of the changes included in the PR"
+        },
+        "changes_detected": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "List of file types or areas changed (e.g., 'API endpoints', 'Database migrations', 'gRPC services')"
+        },
+        "commits_included": {
+            "type": "integer",
+            "description": "Number of commits included in the PR"
+        }
+    },
+    "required": ["success", "summary"]
+}
+"""
+
+exit_expression = "success"
