@@ -19,6 +19,6 @@ jobs:
           REPOSITORY: simplebank
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker login --username $USERNAME --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $USERNAME --password-stdin
           docker build . --file deployment/Dockerfile --tag ghcr.io/$USERNAME/$REPOSITORY:$IMAGE_TAG
           docker push ghcr.io/$USERNAME/$REPOSITORY:$IMAGE_TAG
