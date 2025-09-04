@@ -6,6 +6,8 @@ Simple Bank Service is perhaps the first project I've undertaken outside of my p
 
 I am committed to maintaining this repository as a resource for my professional development in Go. It is my intention that this repository will serve as a valuable asset for anyone seeking to learn how to develop robust software products using Go best practices.
 
+Please let me know if you have any request or probles about this project by create the issue
+
 Thank you for watch!
 
 ## About
@@ -21,7 +23,7 @@ TODO features including:
 1. Top-up a balance account through a payment gateway such as Midtrans.
 2. Release the balance from an account in booking-action schema.
 
-## Running the Service
+## Running The Services
 
 1. Clone the repository
 
@@ -35,13 +37,18 @@ TODO features including:
 
 ### Dependencies
 
-- [Go](https://golang.org/) v1.19
+- [Go](https://golang.org/) v1.23
 - [Migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate) is database migrations written in Go
 
     ```shell
-    # Go 1.16+
-    # Unversioned installation
-    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+    # Versioned installation
+    mkdir -p $GOPATH/src/github.com/golang-migrate
+    git clone github.com/golang-migrate/migrate $GOPATH/src/github.com/golang-migrate/
+    cd $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate
+    git checkout $TAG  # e.g. v4.15.0
+
+    # Replace the postgres build tag with the appropriate database tag(s) for the databases desired
+    go build -tags 'postgres' -ldflags="-X main.Version=$(git describe --tags)" -o $GOPATH/bin/migrate $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate/
     ```
 
 - [SQL Compiler](https://docs.sqlc.dev/en/latest/overview/install.html) that generates type-safe code from SQL
@@ -56,7 +63,7 @@ TODO features including:
     go install github.com/golang/mock/mockgen@v1.6.0
     ```
 
-  Alternatively, use a [maintained fork](https://github.com/uber-go/mock?tab=readme-ov-file#installation) instead
+    Alternatively, use a [maintained fork](https://github.com/uber-go/mock?tab=readme-ov-file#installation) instead
 
     ```shell
     go install go.uber.org/mock/mockgen@latest
@@ -122,22 +129,37 @@ Test your services:
 make test
 ```
 
+### Run your servies and the insfrastructures in Docker containers
+
+Following command will run [docker-compose.yaml](docker-compose.yaml) file
+
+```shell
+make containes
+```
+
+Alternatively, if you already create PostgreSQL dan Redis containers, you just have to run the following command to create only the application container
+
+```shell
+make run EMAIL_SENDER_ADDRESS=ymanshur@gmail.com EMAIL_SENDER_PASSWORD=***juc***yrs***f
+```
+
+Note: EMAIL_SENDER_ADDRESS and EMAIL_SENDER_PASSWORD are the environment variables that needed to create user
+
 ## Documentation
 
 ### Database
 
-1. Update your database design in docs/db.dbml
-2. Build DB documentation:
+Update your database design in [docs/db.dbml](docs/db.dbml) the build DB documentation:
 
-    ```shell
-    make dbdocs
-    ```
+```shell
+make dbdocs
+```
 
 You can access my DB documentation for this project at [this address](https://dbdocs.io/ymanshur/simplebank)
 
 ### OpenAPI
 
-Open <http://localhost:8080/swagger> to see APIs documentation based on gRPC Gateway proto definition
+Open <http://localhost:8080/swagger> to see APIs documentation based on gRPC Gateway proto definition, see my own at [this address](https://ymanshur.github.io/simplebank/docs/swagger/)
 
 ## Code Generation
 
@@ -173,7 +195,7 @@ make proto
 
 ## Tips
 
-### How to hit the endpoint using endpoints.http as a plyaground
+### How to hit the endpoint using endpoints.http as a playground
 
 1. Install [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension
 2. To control environment variables add following lines to .vscode/settings.json

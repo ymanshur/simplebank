@@ -1,0 +1,24 @@
+name: Build and publish image to GitHub Container Registry
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and publish image
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build, tag, and push docker image
+        env:
+          USERNAME: ${{ github.actor }}
+          REPOSITORY: simplebank
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker login --username $USERNAME --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          docker build . --file deployment/Dockerfile --tag ghcr.io/$USERNAME/$REPOSITORY:$IMAGE_TAG
+          docker push ghcr.io/$USERNAME/$REPOSITORY:$IMAGE_TAG

@@ -1,33 +1,39 @@
 # Build stage
-FROM golang:1.19-alpine3.16 AS builder
+FROM golang:1.24.6-alpine3.22 AS builder
 
+# Declare the current working directory inside the base image
 WORKDIR /app
 
-# Bundle app source
+# Copy all necessary files from where we run the docker build command
+# to the working directory
 COPY . .
 
+# Bundle app source
 RUN go build -o main main.go
 
+# RUN apk add curl
+# RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.0/migrate.linux-amd64.tar.gz | tar xvz
+
 # Run stage
-FROM alpine:3.16
+FROM alpine:3.22
 
 WORKDIR /app
-
-#RUN apk add curl
-#RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.0/migrate.linux-amd64.tar.gz | tar xvz
 
 # Bundle executable app and (files) dependencies
 COPY --from=builder /app/main .
-COPY app.env .
+# COPY --from=builder /app/migrate /usr/bin/migrate
+
+COPY app.env.example app.env
+COPY db/migration ./db/migration
 COPY deployment/start.sh .
 COPY deployment/wait-for.sh .
-COPY db/migration ./db/migration
 
 RUN chmod +x start.sh
 RUN chmod +x wait-for.sh
 
-EXPOSE 8080
+# EXPOSE act as a documentation about which ports are intended to be published
+EXPOSE 8080/tcp
+EXPOSE 9090/tcp
 
-#ENTRYPOINT [ "/app/start.sh", "/app/main" ]
 CMD [ "/app/main" ]
 ENTRYPOINT [ "/app/start.sh" ]
