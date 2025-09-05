@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"net/http"
 	"os"
 	"time"
 
@@ -17,8 +18,6 @@ import (
 	"github.com/ymanshur/simplebank/api"
 	"github.com/ymanshur/simplebank/pkg/mail"
 	"github.com/ymanshur/simplebank/pkg/worker"
-
-	"net/http"
 
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
@@ -56,13 +55,15 @@ func main() {
 	store := db.NewStore(conn)
 
 	redisOpt := asynq.RedisClientOpt{
-		Addr: config.RedisAddress,
+		Addr:     config.RedisAddress,
+		Username: config.RedisUsername,
+		Password: config.RedisPassword,
 	}
 
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
 	go runTaskProcessor(config, redisOpt, store)
-	//go runGinServer(config, store)
+	go runGinServer(config, store)
 	go runGrpcServer(config, store, taskDistributor)
 	runGrpcGatewayServer(config, store, taskDistributor)
 }
@@ -127,19 +128,16 @@ func runGrpcGatewayServer(config util.Config, store db.Store, taskDistributor wo
 	err = pb.RegisterSimpleBankHandlerServer(ctx, grpcMux, server)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot register handler server")
-
 	}
 
 	mux := http.NewServeMux()
 	mux.Handle("/", grpcMux)
 
-	//fs := http.FileServer(http.Dir("./docs/swagger"))
 	fs, err := statikFS.New()
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create statik file system")
 	}
 
-	//swaggerHandler := http.StripPrefix("/swagger/", fs)
 	swaggerHandler := http.StripPrefix("/swagger/", http.FileServer(fs))
 	mux.Handle("/swagger/", swaggerHandler)
 

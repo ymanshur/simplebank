@@ -15,6 +15,8 @@ type Config struct {
 	DBSource                 string        `mapstructure:"DB_SOURCE"`
 	DBMigrationURL           string        `mapstructure:"DB_MIGRATION_URL"`
 	RedisAddress             string        `mapstructure:"REDIS_ADDRESS"`
+	RedisUsername            string        `mapstructure:"REDIS_USERNAME"`
+	RedisPassword            string        `mapstructure:"REDIS_PASSWORD"`
 	HTTPServerAddress        string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	GRPCServerAddress        string        `mapstructure:"GRPC_SERVER_ADDRESS"`
 	GRPCGatewayServerAddress string        `mapstructure:"GRPC_GATEWAY_SERVER_ADDRESS"`
