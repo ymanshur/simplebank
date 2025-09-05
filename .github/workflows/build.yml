@@ -15,11 +15,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          shortSHA=$(git rev-parse --short ${{ github.sha }})
+          echo "GITHUB_SHORT_SHA=$shortSHA" >> $GITHUB_ENV
+
       - name: Build, tag, and push docker image
         env:
           USERNAME: ${{ github.actor }}
           REPOSITORY: simplebank
-          IMAGE_TAG: ${{ github.sha::0:7 }}
+          IMAGE_TAG: ${{ env.GITHUB_SHORT_SHA }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $USERNAME --password-stdin
           docker build . --file deployment/Dockerfile --tag ghcr.io/$USERNAME/$REPOSITORY:$IMAGE_TAG
