@@ -1,6 +1,8 @@
 name: Build and publish image to GitHub Container Registry
 
 on:
+  push:
+    branches: ["master"]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +19,7 @@ jobs:
         env:
           USERNAME: ${{ github.actor }}
           REPOSITORY: simplebank
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ github.sha::0:7 }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $USERNAME --password-stdin
           docker build . --file deployment/Dockerfile --tag ghcr.io/$USERNAME/$REPOSITORY:$IMAGE_TAG
