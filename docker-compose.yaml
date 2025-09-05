@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: simplebank-postgres
-    image: postgres:12-alpine
+    image: postgres:14-alpine
     ports:
       - "5432:5432"
     networks:

@@ -1,4 +1,4 @@
-POSTGRES_VERSION?=12
+POSTGRES_VERSION?=14
 POSTGRES_USER?=postgres
 POSTGRES_PASSWORD?=postgres
 
@@ -13,7 +13,7 @@ REDIS_VERSION?=8
 REDIS_PORT?=6379
 
 postgres:
-	docker run --name postgres${POSTGRES_VERSION} --network simplebank-net -p ${DB_PORT}:5432 -r POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
+	docker run --name postgres${POSTGRES_VERSION} --network simplebank-net -p ${DB_PORT}:5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
 
 createdb:
 	docker exec -it postgres${POSTGRES_VERSION} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${DB_NAME}
