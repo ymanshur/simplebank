@@ -1,13 +1,12 @@
 POSTGRES_VERSION?=14
 POSTGRES_USER?=postgres
 POSTGRES_PASSWORD?=postgres
+POSTGRES_DB?=simplebank
+POSTRGES_HOST?=localhost
+POSTGRES_PORT?=5432
 
-DB_NAME?=simplebank
-DB_HOST?=localhost
-DB_PORT?=5432
 DB_SSL?=disable
-
-DB_SOURCE=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL}
+DB_SOURCE=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTRGES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${DB_SSL}
 
 REDIS_VERSION?=8
 REDIS_PORT?=6379
@@ -18,13 +17,13 @@ network:
 	docker network create ${NETWORK}
 
 postgres:
-	docker run --name postgres${POSTGRES_VERSION} --network ${NETWORK} -p ${DB_PORT}:5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
+	docker run --name postgres${POSTGRES_VERSION} --network ${NETWORK} -p ${POSTGRES_PORT}:5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
 
 createdb:
-	docker exec -it postgres${POSTGRES_VERSION} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${DB_NAME}
+	docker exec -it postgres${POSTGRES_VERSION} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${POSTGRES_DB}
 
 dropdb:
-	docker exec -it postgres${POSTGRES_VERSION} dropdb ${DB_NAME}
+	docker exec -it postgres${POSTGRES_VERSION} dropdb ${POSTGRES_DB}
 
 migrateup:
 	migrate -path db/migration -database "$(DB_SOURCE)" -verbose up
@@ -79,13 +78,12 @@ proto:
 build: test
 	docker build -t simplebank:latest -f deployment/Dockerfile .
 
-# run with necessary environment variables
-# to override app.env.example as default values
+# run with necessary environment variables by override app.env
 run: build
 	docker run --name simplebank --network ${NETWORK} --env-file app.env \
 	-p 8080:8080 \
 	-p 9090:9090 \
-	-e DB_SOURCE="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres${POSTGRES_VERSION}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL}" \
+	-e DB_SOURCE="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres${POSTGRES_VERSION}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${DB_SSL}" \
 	-e TOKEN_SYMMETRIC_KEY=${shell openssl rand -hex 64 | head -c 32} \
 	-e REDIS_ADDRESS=redis${REDIS_VERSION}:${REDIS_PORT} \
 	simplebank:latest
