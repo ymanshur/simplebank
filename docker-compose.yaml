@@ -7,6 +7,7 @@ services:
     networks:
       - simplebank-net
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=simplebank
 
@@ -31,13 +32,8 @@ services:
       - simplebank-net
     env_file:
       - app.env
-    # complete environment with appropoate environment variables
-    # to override app.env.example as default values
     environment:
-      - DEBUG=false
       - DB_SOURCE=postgresql://postgres:postgres@postgres:5432/simplebank?sslmode=disable
-      - GRPC_GATEWAY_SERVER_ADDRESS=0.0.0.0:8080
-      - GRPC_SERVER_ADDRESS=0.0.0.0:9090
       - REDIS_ADDRESS=redis:6379
     depends_on:
       - postgres
