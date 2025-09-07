@@ -3,7 +3,7 @@ name: Build
 on:
   workflow_run:
     workflows:
-      - "CI Test"
+      - "Test"
   workflow_dispatch:
 
 jobs:
