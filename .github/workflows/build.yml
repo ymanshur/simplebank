@@ -1,4 +1,4 @@
-name: Build and publish image to GitHub Container Registry
+name: Build
 
 on:
   workflow_run:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build and publish image
+    name: Build and publish the image with tag based on latest commit
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -22,7 +22,7 @@ jobs:
           shortSHA=$(git rev-parse --short ${{ github.sha }})
           echo "GITHUB_SHORT_SHA=$shortSHA" >> $GITHUB_ENV
 
-      - name: Build, tag, and push docker image
+      - name: Build and publish the image to GitHub Container Registry
         env:
           USERNAME: ${{ github.actor }}
           REPOSITORY: simplebank
