@@ -12,8 +12,13 @@ DB_SOURCE=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_POR
 REDIS_VERSION?=8
 REDIS_PORT?=6379
 
+NETWORK?=simplebank-net
+
+network:
+	docker network create ${NETWORK}
+
 postgres:
-	docker run --name postgres${POSTGRES_VERSION} --network simplebank-net -p ${DB_PORT}:5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
+	docker run --name postgres${POSTGRES_VERSION} --network ${NETWORK} -p ${DB_PORT}:5432 -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:${POSTGRES_VERSION}-alpine
 
 createdb:
 	docker exec -it postgres${POSTGRES_VERSION} createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${DB_NAME}
@@ -71,23 +76,18 @@ proto:
     proto/*.proto
 	statik -src=./docs/swagger -dest=./docs
 
-build:
+build: test
 	docker build -t simplebank:latest -f deployment/Dockerfile .
 
 # run with necessary environment variables
 # to override app.env.example as default values
 run: build
-	docker run --name simplebank --network simplebank-net \
+	docker run --name simplebank --network ${NETWORK} --env-file app.env \
 	-p 8080:8080 \
 	-p 9090:9090 \
-	-e DEBUG=false \
 	-e DB_SOURCE="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres${POSTGRES_VERSION}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL}" \
-	-e GRPC_GATEWAY_SERVER_ADDRESS=0.0.0.0:8080 \
-	-e GRPC_SERVER_ADDRESS=0.0.0.0:9090 \
 	-e TOKEN_SYMMETRIC_KEY=${shell openssl rand -hex 64 | head -c 32} \
 	-e REDIS_ADDRESS=redis${REDIS_VERSION}:${REDIS_PORT} \
-	-e EMAIL_SENDER_ADDRESS=${EMAIL_SENDER_ADDRESS} \
-	-e EMAIL_SENDER_PASSWORD=${EMAIL_SENDER_PASSWORD} \
 	simplebank:latest
 
 containers:
@@ -101,7 +101,7 @@ login-aws-ecr:
 	aws ecr get-login-password | docker login --username AWS --password-stdin 009238256455.dkr.ecr.ap-southeast-2.amazonaws.com
 
 redis:
-	docker run --name redis${REDIS_VERSION} --network simplebank-net -p ${REDIS_PORT}:6379 -d redis:${REDIS_VERSION}-alpine
+	docker run --name redis${REDIS_VERSION} --network ${NETWORK} -p ${REDIS_PORT}:6379 -d redis:${REDIS_VERSION}-alpine
 
 redis-ping:
 	docker exec -it redis${REDIS_VERSION} redis-cli ping
