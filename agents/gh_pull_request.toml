@@ -6,11 +6,12 @@ description = "Create a GitHub Pull Request from a local branch to a target bran
 instructions = """
 The agent ensures the local 'from-branch' is up to date with the remote, pushes any behind commits,
 then creates a GitHub Pull Request into 'target-branch'. The PR description should:
-- Follow the template from .github/pull_request_template.md (if it exists)
+- Follow the template from .github/pull_request_template.md including background/context, changes, and others guided section if necessary
 - Summarize changes from commit messages AND from 'git diff'
-- Focus only on the relative changes between branches (ignore the untracked files), not the entire history
-- Include relevant technical details about the project implementation
+- Focus only on the relative changes between branches (ignore the untracked files), not the entire history of the files
+- Include relevant technical details about the changes implementation
 - Reference any significant changes like database migrations, API modifications, or service updates
+- Avoid emojis or emoticons, and do not use bold or other heavy formatting excessively; keep the tone plain and professional
 """
 
 arguments = [
