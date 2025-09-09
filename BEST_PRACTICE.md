@@ -205,7 +205,7 @@ make build          # Build Docker image
 ### Project Documentation
 
 - **README**: Keep updated with setup instructions
-- **BEST_PRACTICE**: This document for development standards
+- **BEST_PRACTICE**: This document is for development standards
 - **API docs**: Auto-generated Swagger documentation
 - **Database schema**: DBML documentation
 
