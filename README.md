@@ -143,6 +143,13 @@ simplebank/
 - [SQL Compiler](https://docs.sqlc.dev/en/latest/overview/install.html) that generates type-safe code from SQL
 
     ```bash
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+    ```
+
+    for Go version under 1.21
+
+    ```bash
     sudo snap install sqlc
     ```
 
@@ -220,6 +227,8 @@ make test
 
 ### Run your servies and the insfrastructures in Docker containers
 
+Complete the necesssary environment variables in the app.env (copy from [app.env.example](/app.env.example)) file.
+
 Following command will run [docker-compose.yaml](docker-compose.yaml) file
 
 ```bash
@@ -229,10 +238,8 @@ make containes
 Alternatively, if you already create PostgreSQL dan Redis containers, you just have to run the following command to create only the application container
 
 ```bash
-make run EMAIL_SENDER_ADDRESS=ymanshur@gmail.com EMAIL_SENDER_PASSWORD=***juc***yrs***f
+make run
 ```
-
-Note: EMAIL_SENDER_ADDRESS and EMAIL_SENDER_PASSWORD are the environment variables that needed to create user
 
 ## Documentation
 
