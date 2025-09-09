@@ -1,6 +1,6 @@
 # Request for Change (RFC)
 
-Brief description of what this PR does and why it's needed.
+The background of what this PR does and why it's needed, @mentions of the person or team responsible for reviewing proposed changes, and reference related issues to this PR as the following examples:
 
 - Closes #ISSUE_NUMBER
 - Fixes #ISSUE_NUMBER
@@ -8,7 +8,7 @@ Brief description of what this PR does and why it's needed.
 
 ## Changes
 
-List the key changes made:
+List the key changes and a brief description proposed made:
 
 - **New features:**
 - **Bug fixes:**
