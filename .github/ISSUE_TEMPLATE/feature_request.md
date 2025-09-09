@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an implementation for this project
-title: "[FEATURE] What the implementation for"
+title: ''
 labels: enhancement
 assignees: ''
 

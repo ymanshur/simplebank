@@ -1,7 +1,7 @@
 ---
 name: Epic
 about: Suggest an idea or user story for this project
-title: "[EPIC] What do you want to work"
+title: ''
 labels: ''
 assignees: ymanshur
 
