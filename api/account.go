@@ -1,12 +1,12 @@
 package api
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/lib/pq"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/token"
@@ -60,7 +60,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 
 	account, err := server.store.GetAccount(ctx, req.ID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -97,8 +97,8 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("unknown user")))
 	}
 
-	var arg = db.ListAccountsParams{
-		Owner: sql.NullString{
+	arg := db.ListAccountsParams{
+		Owner: pgtype.Text{
 			String: authPayload.Username,
 			Valid:  true,
 		},
