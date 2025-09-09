@@ -103,8 +103,3 @@ redis:
 
 redis-ping:
 	docker exec -it redis${REDIS_VERSION} redis-cli ping
-
-# Qodo AI Agent commands
-pr-agent:
-	@mkdir -p .qodo
-	qodo run agents/gh_pull_request.toml create_pr --from-branch=$(from) --target-branch=$(target) 2>&1 | tee .qodo/gh_pull_request_$(shell date +%Y%m%d_%H%M%S).log

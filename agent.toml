@@ -1,9 +1,0 @@
-version = "1.0"
-
-instructions = """
-Reference README.md and BEST_PRACTICE.md for project context and coding standards
-"""
-
-imports = [
-    "agents/gh_pull_request.toml"
-]
