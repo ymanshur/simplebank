@@ -4,11 +4,11 @@
 
 This repo is perhaps the first project I've undertaken outside of my primary professional focus.
 
-I am committed to maintaining this repository as a resource for my professional development in Go. It is my intention that this repository will serve as a valuable asset for anyone seeking to learn how to develop robust software products using Go best practices.
+I am committed to maintaining this repository as a resource for my professional development in Go. I intend that this repository will serve as a valuable asset for anyone seeking to learn how to develop robust software products using Go best practices.
 
-Please let me know if you have any request or probles about this project by create the issue
+Please let me know if you have any requests or problems about this project by creating an issue or discussion
 
-Thank you for watch!
+Thank you for watching!
 
 ## About
 
@@ -16,15 +16,15 @@ Simple Bank Service is a comprehensive banking API that provides secure account 
 
 **Key responsibilities:**
 
-- Create and manage bank accounts, which are composed of owner’s name, balance, and currency.
-- Record all balance changes to each of the account. So every time some money is added to or subtracted from the account, an account entry record will be created.
-- Perform a money transfer between 2 accounts. This should happen within a transaction, so that either both account's balance are updated successfully or none of them are.
+- Create and manage bank accounts, which are composed of the owner’s name, balance, and currency.
+- Record all balance changes to each of the accounts. So every time some money is added to or subtracted from the account, an account entry record will be created.
+- Perform a money transfer between 2 accounts. This should happen within a transaction, so that either both accounts' balances are updated successfully or none of them are.
 - Handle user registration, authentication, and email verification
 
 TODO features including:
 
-1. Top-up a balance account through a payment gateway such as Midtrans.
-2. Release the balance from an account in booking-action schema.
+1. Top up a balance account through a payment gateway such as Midtrans.
+2. Release the balance from an account in the booking-action schema.
 
 ## Architecture Overview
 
@@ -122,7 +122,7 @@ simplebank/
 
 2. [Dependencies installation](#dependencies)
 3. [Setup infrastructure](#setup-infrastructure)
-4. [Run and test your services](#run-your-servies-in-local-machine)
+4. [Run and test your services](#run-your-services-on-the-local-machine)
 
 ### Dependencies
 
@@ -136,7 +136,7 @@ simplebank/
     cd $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate
     git checkout $TAG  # e.g. v4.15.0
 
-    # Replace the postgres build tag with the appropriate database tag(s) for the databases desired
+    # Replace the postgres build tag with the appropriate database tag(s) for the desired databases
     go build -tags 'postgres' -ldflags="-X main.Version=$(git describe --tags)" -o $GOPATH/bin/migrate $GOPATH/src/github.com/golang-migrate/migrate/cmd/migrate/
     ```
 
@@ -213,7 +213,7 @@ Run db migration down all versions:
 make migratedown
 ```
 
-### Run your servies in local machine
+### Run your services on the local machine
 
 ```bash
 make server
@@ -225,17 +225,17 @@ Test your services:
 make test
 ```
 
-### Run your servies and the insfrastructures in Docker containers
+### Run your services and the infrastructures in Docker containers
 
-Complete the necesssary environment variables in the app.env (copy from [app.env.example](/app.env.example)) file.
+Complete the necessary environment variables in the app.env (copy from [app.env.example](/app.env.example)) file.
 
-Following command will run [docker-compose.yaml](docker-compose.yaml) file
+The following command will run the [docker-compose.yaml](docker-compose.yaml) file
 
 ```bash
-make containes
+make containers
 ```
 
-Alternatively, if you already create PostgreSQL dan Redis containers, you just have to run the following command to create only the application container
+Alternatively, if you have already created PostgreSQL and Redis containers, you just have to run the following command to create only the application container
 
 ```bash
 make run
@@ -245,7 +245,7 @@ make run
 
 ### Database
 
-Update your database design in [docs/db.dbml](docs/db.dbml) the build DB documentation:
+Update your database design in [docs/db.dbml](docs/db.dbml), build the DB documentation:
 
 ```bash
 make dbdocs
@@ -255,7 +255,7 @@ You can access my DB documentation for this project at [this address](https://db
 
 ### OpenAPI
 
-Open <http://localhost:8080/swagger> to see APIs documentation based on gRPC Gateway proto definition, see my own at [this address](https://ymanshur.github.io/simplebank/docs/swagger/)
+Open <http://localhost:8080/swagger> to see API documentation based on the gRPC Gateway proto definition, see my own at [this address](https://ymanshur.github.io/simplebank/docs/swagger/)
 
 ## Code Generation
 
@@ -294,7 +294,7 @@ make proto
 ### How to hit the endpoint using endpoints.http as a playground
 
 1. Install [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension
-2. To control environment variables add following lines to .vscode/settings.json
+2. To control environment variables, add the following lines to .vscode/settings.json
 
     ```json
     "rest-client.environmentVariables": {
@@ -307,13 +307,13 @@ make proto
     ```
 
 3. Copy the returning access and refresh token into environment variables
-4. Run the HTTP or Gateway server and follow REST Client documentation to [making request](https://github.com/Huachao/vscode-restclient?tab=readme-ov-file#making-request)
+4. Run the HTTP or Gateway server and follow REST Client documentation to [make a request](https://github.com/Huachao/vscode-restclient?tab=readme-ov-file#making-request)
 
     ![REST Client Example](assets/rest-client-example-1.png)
 
 ### Control Workspace environment variables
 
-Add following line into .vscode/settings.json
+Add the following line to .vscode/settings.json
 
 ```json
 {
