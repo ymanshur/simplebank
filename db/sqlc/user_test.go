@@ -2,11 +2,12 @@ package db
 
 import (
 	"context"
-	"database/sql"
-	"github.com/stretchr/testify/require"
-	"github.com/ymanshur/simplebank/pkg/util"
 	"testing"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 func createRandomUser(t *testing.T) User {
@@ -20,7 +21,7 @@ func createRandomUser(t *testing.T) User {
 		HashedPassword: hashedPassword,
 	}
 
-	user, err := testQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -41,7 +42,7 @@ func TestQueries_CreateUser(t *testing.T) {
 
 func TestQueries_GetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := testQueries.GetUser(context.Background(), user1.Username)
+	user2, err := testStore.GetUser(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -57,9 +58,9 @@ func TestQueries_UpdateUser_FullName(t *testing.T) {
 	oldUser := createRandomUser(t)
 
 	newFullName := util.RandomOwner()
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
-		FullName: sql.NullString{
+		FullName: pgtype.Text{
 			String: newFullName,
 			Valid:  true,
 		},

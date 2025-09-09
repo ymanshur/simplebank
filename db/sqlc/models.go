@@ -5,10 +5,10 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Account struct {
@@ -23,8 +23,8 @@ type Entry struct {
 	ID        int64 `json:"id"`
 	AccountID int64 `json:"account_id"`
 	// can be positive or negative
-	Amount    int64        `json:"amount"`
-	CreatedAt sql.NullTime `json:"created_at"`
+	Amount    int64              `json:"amount"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Session struct {

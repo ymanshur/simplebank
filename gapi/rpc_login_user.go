@@ -2,7 +2,8 @@ package gapi
 
 import (
 	"context"
-	"database/sql"
+	"errors"
+
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pb"
 	"github.com/ymanshur/simplebank/pkg/util"
@@ -20,7 +21,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 
 	user, err := server.store.GetUser(ctx, req.GetUsername())
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "user not found")
 		}
 		return nil, status.Errorf(codes.Internal, "failed to find use: %s", err)
@@ -29,7 +30,6 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	err = util.CheckPassword(req.GetPassword(), user.HashedPassword)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "incorrect password")
-
 	}
 
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
@@ -61,7 +61,6 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create session")
-
 	}
 
 	rsp := &pb.LoginUserResponse{
