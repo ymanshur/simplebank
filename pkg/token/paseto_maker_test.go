@@ -1,10 +1,11 @@
 package token
 
 import (
-	"github.com/stretchr/testify/require"
-	"github.com/ymanshur/simplebank/pkg/util"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 func TestNewPasetoMaker(t *testing.T) {
@@ -12,12 +13,13 @@ func TestNewPasetoMaker(t *testing.T) {
 	require.NoError(t, err)
 
 	username := util.RandomOwner()
+	role := util.DepositorRole
 	duration := time.Minute
 
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
-	token, payload, err := maker.CreateToken(username, duration)
+	token, payload, err := maker.CreateToken(username, role, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
@@ -36,7 +38,7 @@ func TestPasetoMaker_VerifyToken_Expired(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, payload, err := maker.CreateToken(util.RandomOwner(), -time.Minute)
+	token, payload, err := maker.CreateToken(util.RandomOwner(), util.DepositorRole, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
