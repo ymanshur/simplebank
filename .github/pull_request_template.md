@@ -18,12 +18,9 @@ List the key changes and a brief description proposed made:
 
 Any new dependencies, config changes, or infrastructure updates?
 
-## Testing
+## Testing Instructions
 
-- [ ] Unit tests added/updated
-- [ ] Integration tests added/updated
-- [ ] Tested manually
-- [ ] Performance tested (if needed)
+Detail the steps necessary to test these changes.
 
 ## Notes
 
