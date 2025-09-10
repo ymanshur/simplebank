@@ -1,8 +1,8 @@
 ---
 name: Epic
 about: Suggest an idea or user story for this project
-title: ''
-labels: ''
+title: 'Epic: [EPIC_NAME]'
+labels: enhancement
 assignees: ymanshur
 
 ---

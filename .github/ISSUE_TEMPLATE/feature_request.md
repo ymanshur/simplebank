@@ -1,9 +1,9 @@
 ---
 name: Feature request
 about: Suggest an implementation for this project
-title: ''
-labels: enhancement
-assignees: ''
+title: 'Feature: [FEATURE_NAME]'
+labels: documentation, enhancement
+assignees: ymanshur
 
 ---
 
