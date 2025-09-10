@@ -3,9 +3,10 @@ package gapi
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/ymanshur/simplebank/pkg/token"
 	"google.golang.org/grpc/metadata"
-	"strings"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 	authorizationBearer = "bearer"
 )
 
-func (server *Server) authorizeUser(ctx context.Context) (*token.Payload, error) {
+func (server *Server) authorizeUser(ctx context.Context, accessibleRoles []string) (*token.Payload, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("missing metadata")
@@ -41,5 +42,18 @@ func (server *Server) authorizeUser(ctx context.Context) (*token.Payload, error)
 		return nil, fmt.Errorf("invalid access token: %s", err)
 	}
 
+	if !hasPermission(payload.Role, accessibleRoles) {
+		return nil, fmt.Errorf("Permission denied")
+	}
+
 	return payload, nil
+}
+
+func hasPermission(userRole string, accessibleRole []string) bool {
+	for _, role := range accessibleRole {
+		if userRole == role {
+			return true
+		}
+	}
+	return false
 }
