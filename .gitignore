@@ -8,3 +8,6 @@ app.env.*
 
 # Log files
 *.log
+
+# Temporary files
+tmp
