@@ -1,11 +1,14 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
@@ -17,6 +20,7 @@ type Server struct {
 	store      db.Store
 	tokenMaker token.Maker
 	router     *gin.Engine
+	http       *http.Server
 }
 
 // NewServer creates a new HTTP server and set up routing.
@@ -65,7 +69,27 @@ func (server *Server) setupRouter() {
 
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
-	return server.router.Run(address)
+	server.http = &http.Server{
+		Addr:    address,
+		Handler: server.router.Handler(),
+	}
+
+	log.Info().Msgf("start HTTP server at %s", server.http.Addr)
+
+	return server.http.ListenAndServe()
+}
+
+func (server *Server) Shutdown() error {
+	log.Info().Msg("graceful shutdown HTTP gateway server")
+
+	err := server.http.Shutdown(context.Background())
+	if err != nil {
+		return err
+	}
+
+	log.Info().Msg("HTTP server is stopped")
+
+	return nil
 }
 
 func errorResponse(err error) gin.H {
