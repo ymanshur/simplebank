@@ -187,6 +187,15 @@ simplebank/
     dbml2sql --version
     ```
 
+- Install gPRC, OpenAPI, and Statik dependencies by
+
+    ```bash
+    # Go v1.24
+    go install tool
+    ```
+
+    According to [tool directive](https://github.com/grpc-ecosystem/grpc-gateway?tab=readme-ov-file#using-the-tool-directive-in-go-124) for dependencies of binary package
+
 ### Setup infrastructure
 
 Start database PostgreSQL container service:
