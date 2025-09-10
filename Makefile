@@ -97,9 +97,6 @@ containers:
 randhex64:
 	openssl rand -hex 64 | head -c $(head)
 
-login-aws-ecr:
-	aws ecr get-login-password | docker login --username AWS --password-stdin 009238256455.dkr.ecr.ap-southeast-2.amazonaws.com
-
 redis:
 	docker run --name redis${REDIS_VERSION} --network ${NETWORK} -p ${REDIS_PORT}:6379 -d redis:${REDIS_VERSION}-alpine
 
