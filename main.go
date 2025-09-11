@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
 	"os"
 	"os/signal"
@@ -29,6 +29,7 @@ import (
 	"github.com/ymanshur/simplebank/pb"
 	"github.com/ymanshur/simplebank/pkg/util"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -107,6 +108,7 @@ func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config uti
 	taskProcessor := worker.NewRedisTaskProcessor(config, redisOpt, store, mailer)
 
 	log.Info().Msg("start task processor")
+
 	err := taskProcessor.Start()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start task processor")
@@ -134,7 +136,13 @@ func runGrpcServer(ctx context.Context, waitGroup *errgroup.Group, config util.C
 	waitGroup.Go(func() error {
 		err = server.Start(config.GRPCServerAddress)
 		if err != nil {
-			return fmt.Errorf("cannot start gRPC server: %v", err)
+			if errors.Is(err, grpc.ErrServerStopped) {
+				return nil
+			}
+
+			log.Error().Err(err).Msg("cannot start gRPC server")
+
+			return err
 		}
 
 		return nil
@@ -185,7 +193,13 @@ func runGrpcGatewayServer(ctx context.Context, waitGroup *errgroup.Group, config
 	waitGroup.Go(func() error {
 		err = server.StartGateway(config.GRPCGatewayServerAddress, mux)
 		if err != nil {
-			return fmt.Errorf("cannot start HTTP gateway server: %v", err)
+			if errors.Is(err, http.ErrServerClosed) {
+				return nil
+			}
+
+			log.Error().Err(err).Msg("cannot start HTTP gateway server")
+
+			return err
 		}
 
 		return nil
@@ -196,7 +210,9 @@ func runGrpcGatewayServer(ctx context.Context, waitGroup *errgroup.Group, config
 
 		err = server.ShutdownGateway()
 		if err != nil {
-			return fmt.Errorf("cannot graceful shutdown HTTP gateway server: %v", err)
+			log.Error().Err(err).Msg("cannot graceful shutdown HTTP gateway server")
+
+			return err
 		}
 
 		return nil
@@ -212,7 +228,13 @@ func runGinServer(ctx context.Context, waitGroup *errgroup.Group, config util.Co
 	waitGroup.Go(func() error {
 		err = server.Start(config.HTTPServerAddress)
 		if err != nil {
-			return fmt.Errorf("cannot start HTTP server: %v", err)
+			if errors.Is(err, http.ErrServerClosed) {
+				return nil
+			}
+
+			log.Error().Err(err).Msg("cannot start HTTP server")
+
+			return err
 		}
 
 		return nil
@@ -223,7 +245,9 @@ func runGinServer(ctx context.Context, waitGroup *errgroup.Group, config util.Co
 
 		err = server.Shutdown()
 		if err != nil {
-			return fmt.Errorf("cannot graceful shutdown HTTP server: %v", err)
+			log.Error().Err(err).Msg("cannot graceful shutdown HTTP server")
+
+			return err
 		}
 
 		return nil
