@@ -1,6 +1,6 @@
 # Simple Bank Service
 
-[![CI Test](https://github.com/ymanshur/simplebank/actions/workflows/test.yml/badge.svg)](https://github.com/ymanshur/simplebank/actions/workflows/test.yml)
+[![CI](https://github.com/ymanshur/simplebank/actions/workflows/ci.yml/badge.svg)](https://github.com/ymanshur/simplebank/actions/workflows/ci.yml)
 
 This repo is perhaps the first project I've undertaken outside of my primary professional focus.
 
