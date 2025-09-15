@@ -47,7 +47,6 @@ test:
 	go test -v -cover -short ./...
 
 server:
-	clear
 	go run main.go
 
 mock:
@@ -80,7 +79,7 @@ build: test
 
 # run with necessary environment variables by override app.env
 run: build
-	docker run --name simplebank --network ${NETWORK} --env-file app.env \
+	docker run -d --name simplebank --network ${NETWORK} --env-file app.env \
 	-p 8080:8080 \
 	-p 9090:9090 \
 	-e DB_SOURCE="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres${POSTGRES_VERSION}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${DB_SSL}" \
@@ -101,4 +100,4 @@ redis:
 	docker run --name redis${REDIS_VERSION} --network ${NETWORK} -p ${REDIS_PORT}:6379 -d redis:${REDIS_VERSION}-alpine
 
 redis-ping:
-	docker exec -it redis${REDIS_VERSION} redis-cli ping
+	docker exec -it redis${REDIS_VERSION} redis-cli PING
