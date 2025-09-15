@@ -14,17 +14,21 @@ Thank you for watching!
 
 Simple Bank Service is a comprehensive banking API that provides secure account management, money transfers, and user authentication with email verification.
 
-**Key responsibilities:**
+### Key Responsibilities
 
 - Create and manage bank accounts, which are composed of the owner’s name, balance, and currency.
 - Record all balance changes to each of the accounts. So every time some money is added to or subtracted from the account, an account entry record will be created.
 - Perform a money transfer between 2 accounts. This should happen within a transaction, so that either both accounts' balances are updated successfully or none of them are.
 - Handle user registration, authentication, and email verification
 
-TODO features including:
+**TODO APIs including:**
 
 1. Top up a balance account through a payment gateway such as Midtrans.
 2. Release the balance from an account in the booking-action schema.
+
+### Features
+
+- **Graceful shutdown**: It can stop receiving new requests, and wait for all on-going requests to be completed before shutting down (related issue [#28](https://github.com/ymanshur/simplebank/issues/28))
 
 ## Architecture Overview
 
