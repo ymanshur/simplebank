@@ -49,7 +49,7 @@ Simple Bank Service is a comprehensive banking API that provides secure account 
 
 1. **Client Request** - HTTP request hits gRPC Gateway or direct gRPC call
 2. **Authentication** - Token validation using JWT/PASETO makers
-3. **Business Logic** - Request processed through appropriate handler (api/ or gapi/)
+3. **Business Logic** - Request processed through appropriate handler (`api/` or `gapi/`)
 4. **Database Operations** - SQLC-generated code executes type-safe SQL queries
 5. **Background Tasks** - Email verification and other async tasks queued to Redis
 6. **Response** - JSON response returned via HTTP or gRPC protocol
@@ -98,23 +98,19 @@ simplebank/
 - **gRPC Framework:** Google gRPC - High-performance RPC framework with Protocol Buffers
 - **Database:** PostgreSQL - ACID-compliant relational database for financial data
 - **Cache/Queue:** Redis - In-memory store for background task queuing
+- **Containerization:** Docker - Containerization for development and deployment
+- **CI/CD:** GitHub Actions - Continuous integration and testing
 
 ### Key Libraries
 
-- **SQLC** - Generates type-safe Go code from SQL queries
-- **golang-migrate** - Database migration management
-- **Asynq** - Distributed task queue for background processing
-- **Viper** - Configuration management with environment variable support
-- **Zerolog** - Structured logging with JSON output
-- **Testify** - Testing toolkit with assertions and mocks
-
-### Development Tools
-
-- **GoMock** - Mock generation for testing
-- **Protocol Buffers** - API definition and code generation
-- **gRPC Gateway** - HTTP to gRPC translation layer
-- **Docker** - Containerization for development and deployment
-- **GitHub Actions** - Continuous integration and testing
+- [SQLC](https://github.com/sqlc-dev/sqlc) - Generates type-safe Go code from SQL queries
+- [Migrate](https://github.com/golang-migrate/migrate) - Database migration management
+- [Asynq](https://github.com/hibiken/asynq) - Distributed task queue for background processing
+- [Viper](https://github.com/spf13/viper) - Configuration management with environment variable support
+- [Zerolog](https://github.com/rs/zerolog) - Structured logging with JSON output
+- [Testify](https://github.com/stretchr/testify) - Testing toolkit with assertions and mocks
+- [PASETO](https://github.com/o1egl/paseto) - Specification and reference implementation for secure stateless tokens.
+- [CORS](https://github.com/rs/cors) - Cross Origin Resource Sharing W3 specification
 
 ## Running The Services
 
