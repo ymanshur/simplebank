@@ -45,16 +45,13 @@ services:
 
     # entrypoint will override ENTRYPOINT in Dockerfile,
     # meaning that CMD will be ignored too
-    entrypoint: [
-      "/app/wait-for.sh", "postgres:5432", "--",
-      "/app/start.sh"
-    ]
-    command: [ "/app/main" ]
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/main"]
 
 networks:
   simplebank-net:
-      name: simplebank-net
-      external: false
+    name: simplebank-net
+    external: false
 
 volumes:
   pg-data:
