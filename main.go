@@ -191,7 +191,7 @@ func runGrpcGatewayServer(ctx context.Context, waitGroup *errgroup.Group, config
 	mux.Handle("/swagger/", swaggerHandler)
 
 	waitGroup.Go(func() error {
-		err = server.StartGateway(config.GRPCGatewayServerAddress, mux)
+		err = server.StartGateway(config.GRPCGatewayServerAddress, config.AllowedOrigins, mux)
 		if err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				return nil

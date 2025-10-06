@@ -73,9 +73,10 @@ func (server *Server) Shutdown() {
 	log.Info().Msg("gRPC server is stopped")
 }
 
-func (server *Server) StartGateway(address string, mux *http.ServeMux) error {
+func (server *Server) StartGateway(address string, allowedOrigins []string, mux *http.ServeMux) error {
 	handler := HttpLogger(mux)
 	handlerWithCORS := cors.New(cors.Options{
+		AllowedOrigins: allowedOrigins,
 		AllowedHeaders: []string{"*"},
 	}).Handler(handler)
 
