@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pb"
@@ -73,9 +74,14 @@ func (server *Server) Shutdown() {
 }
 
 func (server *Server) StartGateway(address string, mux *http.ServeMux) error {
+	handler := HttpLogger(mux)
+	handlerWithCORS := cors.New(cors.Options{
+		AllowedHeaders: []string{"*"},
+	}).Handler(handler)
+
 	server.gateway = &http.Server{
 		Addr:    address,
-		Handler: HttpLogger(mux),
+		Handler: handlerWithCORS,
 	}
 
 	log.Info().Msgf("start HTTP gateway server at %s", server.gateway.Addr)
