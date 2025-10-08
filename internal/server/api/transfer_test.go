@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 func TestServer_Transfer(t *testing.T) {
@@ -28,9 +28,9 @@ func TestServer_Transfer(t *testing.T) {
 	account2 := randomAccount(user2.Username)
 	account3 := randomAccount(user3.Username)
 
-	account1.Currency = util.USD
-	account2.Currency = util.USD
-	account3.Currency = util.EUR
+	account1.Currency = common.USD
+	account2.Currency = common.USD
+	account3.Currency = common.EUR
 
 	testCases := []struct {
 		name          string
@@ -45,7 +45,7 @@ func TestServer_Transfer(t *testing.T) {
 				"from_account_id": account1.ID,
 				"to_account_id":   account2.ID,
 				"amount":          amount,
-				"currency":        util.USD,
+				"currency":        common.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user1.Username, user1.Role, time.Minute)
@@ -71,7 +71,7 @@ func TestServer_Transfer(t *testing.T) {
 				"from_account_id": account1.ID,
 				"to_account_id":   account2.ID,
 				"amount":          amount,
-				"currency":        util.USD,
+				"currency":        common.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user2.Username, user2.Role, time.Minute)
@@ -91,7 +91,7 @@ func TestServer_Transfer(t *testing.T) {
 				"from_account_id": account3.ID,
 				"to_account_id":   account2.ID,
 				"amount":          amount,
-				"currency":        util.USD,
+				"currency":        common.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user3.Username, user3.Role, time.Minute)

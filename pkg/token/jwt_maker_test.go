@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/pkg/util"
 )
 
@@ -14,7 +15,7 @@ func TestNewJWTMaker(t *testing.T) {
 	require.NoError(t, err)
 
 	username := util.RandomOwner()
-	role := util.DepositorRole
+	role := common.DepositorRole
 	duration := time.Minute
 
 	issuedAt := time.Now()
@@ -39,7 +40,7 @@ func TestJWTMaker_VerifyToken_Expired(t *testing.T) {
 	maker, err := NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	token, payload, err := maker.CreateToken(util.RandomOwner(), util.DepositorRole, -time.Minute)
+	token, payload, err := maker.CreateToken(util.RandomOwner(), common.DepositorRole, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
@@ -51,7 +52,7 @@ func TestJWTMaker_VerifyToken_Expired(t *testing.T) {
 }
 
 func TestJWTMaker_VerifyToken_Invalid(t *testing.T) {
-	payload, err := NewPayload(util.RandomOwner(), util.DepositorRole, time.Minute)
+	payload, err := NewPayload(util.RandomOwner(), common.DepositorRole, time.Minute)
 	require.NoError(t, err)
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)

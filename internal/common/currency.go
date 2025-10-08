@@ -1,4 +1,6 @@
-package util
+package common
+
+import "math/rand"
 
 // Constants for all supported currencies
 const (
@@ -15,4 +17,11 @@ func IsSupportedCurrency(currency string) bool {
 		return true
 	}
 	return false
+}
+
+// RandomCurrency generates a random currency code
+func RandomCurrency() string {
+	currencies := []string{IDR, EUR, USD, CAD}
+	n := len(currencies)
+	return currencies[rand.Intn(n)]
 }

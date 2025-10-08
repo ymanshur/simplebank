@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 func addAuthorization(
@@ -39,7 +39,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "OK",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "user", util.DepositorRole, time.Minute)
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "user", common.DepositorRole, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -56,7 +56,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "Expired Token",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "user", util.DepositorRole, -time.Minute)
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "user", common.DepositorRole, -time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)

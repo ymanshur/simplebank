@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/pkg/util"
 	"github.com/ymanshur/simplebank/pkg/worker"
 	mockworker "github.com/ymanshur/simplebank/pkg/worker/mock"
@@ -161,7 +162,7 @@ func randomUser(t *testing.T) (user db.User, password string) {
 
 	user = db.User{
 		Username:       util.RandomOwner(),
-		Role:           util.DepositorRole,
+		Role:           common.DepositorRole,
 		HashedPassword: hashedPassword,
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),

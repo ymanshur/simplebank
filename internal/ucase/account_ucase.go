@@ -8,9 +8,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
-	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 type accountUcase struct {
@@ -31,7 +31,7 @@ type AuthRequest struct {
 func (r AuthRequest) Validate() error {
 	return validation.ValidateStruct(&r,
 		validation.Field(&r.Username, validation.By(validator.ValidUsername)),
-		validation.Field(&r.Role, validation.In(util.BankerRole, util.DepositorRole)),
+		validation.Field(&r.Role, validation.In(common.BankerRole, common.DepositorRole)),
 	)
 }
 

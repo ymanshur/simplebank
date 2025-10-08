@@ -218,7 +218,7 @@ func (r UpdateUserRequest) Validate() error {
 }
 
 func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error) {
-	if !common.HasPermission(req.Auth.Role, []string{util.BankerRole, util.DepositorRole}) {
+	if !common.HasPermission(req.Auth.Role, []string{common.BankerRole, common.DepositorRole}) {
 		return nil, ErrPermisionDenied
 	}
 
@@ -230,7 +230,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 		return nil, typex.ErrUnAuthorized("unknown user")
 	}
 
-	if req.Auth.Role != util.BankerRole && req.Auth.Username != req.Username {
+	if req.Auth.Role != common.BankerRole && req.Auth.Username != req.Username {
 		return nil, typex.ErrForbidden("cannot update other user's info")
 	}
 

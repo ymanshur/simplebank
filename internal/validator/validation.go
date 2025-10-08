@@ -5,7 +5,7 @@ import (
 	"net/mail"
 	"regexp"
 
-	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/internal/common"
 )
 
 var (
@@ -63,7 +63,7 @@ func validateEmail(value string) error {
 }
 
 func validateCurrency(value string) error {
-	if !util.IsSupportedCurrency(value) {
+	if !common.IsSupportedCurrency(value) {
 		return fmt.Errorf("%s is not supported currency", value)
 	}
 	return nil

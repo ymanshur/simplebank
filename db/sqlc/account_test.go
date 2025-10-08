@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/pkg/util"
 )
 
@@ -15,7 +16,7 @@ func createRandomAccount(t *testing.T) Account {
 	arg := CreateAccountParams{
 		Owner:    user.Username,
 		Balance:  util.RandomMoney(),
-		Currency: util.RandomCurrency(),
+		Currency: common.RandomCurrency(),
 	}
 
 	account, err := testStore.CreateAccount(context.Background(), arg)
