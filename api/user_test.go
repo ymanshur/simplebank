@@ -17,36 +17,45 @@ import (
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/pkg/worker"
+	mockworker "github.com/ymanshur/simplebank/pkg/worker/mock"
 )
 
-// eqCreateUserParamsMatcher is used to represent the valid or expected arguments to createUser method.
-type eqCreateUserParamsMatcher struct {
-	arg      db.CreateUserParams
+// eqCreateUserTxParamsMatcher is used to represent the valid or expected arguments to createUser method.
+type eqCreateUserTxParamsMatcher struct {
+	arg      db.CreateUserTxParams
 	password string
+	user     db.User
 }
 
-func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
-	arg, ok := x.(db.CreateUserParams)
+func (expected eqCreateUserTxParamsMatcher) Matches(x interface{}) bool {
+	arg, ok := x.(db.CreateUserTxParams)
 	if !ok {
 		return false
 	}
 
-	err := util.CheckPassword(e.password, arg.HashedPassword)
+	err := util.CheckPassword(expected.password, arg.HashedPassword)
 	if err != nil {
 		return false
 	}
 
-	e.arg.HashedPassword = arg.HashedPassword
-	return reflect.DeepEqual(e.arg, arg)
+	expected.arg.HashedPassword = arg.HashedPassword
+	// there is no way to compare between functions
+	if !reflect.DeepEqual(expected.arg.CreateUserParams, arg.CreateUserParams) {
+		return false
+	}
+
+	err = arg.AfterCreate(expected.user)
+	return err == nil
 }
 
-func (e eqCreateUserParamsMatcher) String() string {
-	return fmt.Sprintf("matches arg %v and password %v", e.arg, e.password)
+func (e eqCreateUserTxParamsMatcher) String() string {
+	return fmt.Sprintf("matches arg %v and password %v", e.arg.CreateUserParams, e.password)
 }
 
-// EqCreateUserParams returns a matcher that matches on CreateUserParams equality.
-func EqCreateUserParams(arg db.CreateUserParams, password string) gomock.Matcher {
-	return eqCreateUserParamsMatcher{arg, password}
+// EqCreateUserTxParams returns a matcher that matches on CreateUserTxParams equality.
+func EqCreateUserTxParams(arg db.CreateUserTxParams, password string, user db.User) gomock.Matcher {
+	return eqCreateUserTxParamsMatcher{arg, password, user}
 }
 
 func TestServer_CreateUser(t *testing.T) {
@@ -55,7 +64,7 @@ func TestServer_CreateUser(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(store *mockdb.MockStore)
+		buildStubs    func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor)
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -66,20 +75,32 @@ func TestServer_CreateUser(t *testing.T) {
 				"email":     user.Email,
 				"password":  password,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.CreateUserParams{
-					Username: user.Username,
-					FullName: user.FullName,
-					Email:    user.Email,
+			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
+				arg := db.CreateUserTxParams{
+					CreateUserParams: db.CreateUserParams{
+						Username:       user.Username,
+						FullName:       user.FullName,
+						Email:          user.Email,
+						HashedPassword: password,
+					},
 				}
 
 				store.EXPECT().
-					CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).
+					CreateUserTx(gomock.Any(), EqCreateUserTxParams(arg, password, user)).
 					Times(1).
-					Return(user, nil)
+					Return(db.CreateUserTxResult{User: user}, nil)
+
+				taskPayload := &worker.PayloadSendVerifyEmail{
+					Username: user.Username,
+				}
+				taskDistributor.EXPECT().
+					DistributeTaskSendVerifyEmail(gomock.Any(), taskPayload, gomock.Any()).
+					Times(1).
+					Return(nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
+				require.NotNil(t, recorder.Body)
 				requireBodyMatchUser(t, recorder.Body, user)
 			},
 		},
@@ -91,11 +112,15 @@ func TestServer_CreateUser(t *testing.T) {
 				"email":     user.Email,
 				"password":  password,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
+			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
 				store.EXPECT().
-					CreateUser(gomock.Any(), gomock.Any()).
+					CreateUserTx(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.User{}, sql.ErrConnDone)
+					Return(db.CreateUserTxResult{}, sql.ErrConnDone)
+
+				taskDistributor.EXPECT().
+					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -109,14 +134,18 @@ func TestServer_CreateUser(t *testing.T) {
 				"email":     user.Email,
 				"password":  password,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
+			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
 				store.EXPECT().
-					CreateUser(gomock.Any(), gomock.Any()).
+					CreateUserTx(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.User{}, db.ErrUniqueViolation)
+					Return(db.CreateUserTxResult{}, db.ErrUniqueViolation)
+
+				taskDistributor.EXPECT().
+					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusForbidden, recorder.Code)
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 		{
@@ -127,13 +156,17 @@ func TestServer_CreateUser(t *testing.T) {
 				"email":     user.Email,
 				"password":  password,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
+			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
+
+				taskDistributor.EXPECT().
+					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 		{
@@ -144,13 +177,17 @@ func TestServer_CreateUser(t *testing.T) {
 				"email":     "invalid-email",
 				"password":  password,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
+			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
+
+				taskDistributor.EXPECT().
+					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 		{
@@ -161,28 +198,36 @@ func TestServer_CreateUser(t *testing.T) {
 				"email":     user.Email,
 				"password":  "123",
 			},
-			buildStubs: func(store *mockdb.MockStore) {
+			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
+
+				taskDistributor.EXPECT().
+					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
+			storeCtrl := gomock.NewController(t)
+			defer storeCtrl.Finish()
+			store := mockdb.NewMockStore(storeCtrl)
 
-			store := mockdb.NewMockStore(ctrl)
+			taskCtrl := gomock.NewController(t)
+			defer taskCtrl.Finish()
+			taskDistributor := mockworker.NewMockTaskDistributor(taskCtrl)
+
 			// build stubs
-			testCase.buildStubs(store)
+			testCase.buildStubs(store, taskDistributor)
 
 			// start test server and send request
-			server := newTestServer(t, store)
+			server := newTestServer(t, store, taskDistributor)
 
 			recorder := httptest.NewRecorder()
 
@@ -190,7 +235,7 @@ func TestServer_CreateUser(t *testing.T) {
 			data, err := json.Marshal(testCase.body)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/v1/users", bytes.NewReader(data))
+			request := httptest.NewRequest(http.MethodPost, "/v1/create_user", bytes.NewReader(data))
 			server.router.ServeHTTP(recorder, request)
 
 			// check response
@@ -230,7 +275,7 @@ func TestServer_LoginUser(t *testing.T) {
 		{
 			name: "UserNotFound",
 			body: gin.H{
-				"username": "NotFound",
+				"username": "not_found",
 				"password": password,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
@@ -287,7 +332,7 @@ func TestServer_LoginUser(t *testing.T) {
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 	}
@@ -302,7 +347,7 @@ func TestServer_LoginUser(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := newTestServer(t, store)
+			server := newTestServer(t, store, nil)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON

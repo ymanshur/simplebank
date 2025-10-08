@@ -7,24 +7,29 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/internal/typex"
+	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
 	config     util.Config
-	store      db.Store
 	tokenMaker token.Maker
 	router     *gin.Engine
 	http       *http.Server
+	ucase      ucase.UseCase
 }
 
 // NewServer creates a new HTTP server and set up routing.
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -32,8 +37,8 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 
 	server := &Server{
 		config:     config,
-		store:      store,
 		tokenMaker: tokenMaker,
+		ucase:      ucase.NewUseCase(config, store, tokenMaker, taskDistributor),
 	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -52,7 +57,7 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	v1Routes := router.Group("/v1")
-	v1Routes.POST("/users", server.createUser)
+	v1Routes.POST("/create_user", server.createUser)
 	v1Routes.POST("/login_user", server.loginUser)
 	v1Routes.POST("/renew_access_token", server.renewAccessToken)
 
@@ -80,7 +85,7 @@ func (server *Server) Start(address string) error {
 }
 
 func (server *Server) Shutdown() error {
-	log.Info().Msg("graceful shutdown HTTP gateway server")
+	log.Info().Msg("graceful shutdown HTTP server")
 
 	err := server.http.Shutdown(context.Background())
 	if err != nil {
@@ -92,6 +97,25 @@ func (server *Server) Shutdown() error {
 	return nil
 }
 
-func errorResponse(err error) gin.H {
+func responseError(err error) gin.H {
 	return gin.H{"error": err.Error()}
+}
+
+func translationError(err error) (int, error) {
+	errCause := errors.Cause(err)
+	switch errCause {
+	}
+
+	switch errCause := errCause.(type) {
+	case validation.Errors, typex.ErrUnProcessableEnity:
+		return http.StatusUnprocessableEntity, errCause
+	case typex.ErrDataNotFound:
+		return http.StatusNotFound, errCause
+	case typex.ErrUnAuthorized:
+		return http.StatusUnauthorized, errCause
+	case typex.ErrForbidden:
+		return http.StatusForbidden, errCause
+	default:
+		return http.StatusInternalServerError, errCause
+	}
 }

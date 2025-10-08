@@ -117,7 +117,7 @@ func TestServer_Transfer(t *testing.T) {
 			testCase.buildStubs(store)
 
 			// start test server and send request
-			server := newTestServer(t, store)
+			server := newTestServer(t, store, nil)
 
 			recorder := httptest.NewRecorder()
 

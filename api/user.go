@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/uuid"
-	db "github.com/ymanshur/simplebank/db/sqlc"
-	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/internal/ucase"
 )
 
 type createUserRequest struct {
-	Username string `json:"username" binding:"required,alphanum"`
-	FullName string `json:"full_name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
+	Username string `json:"username"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type userResponse struct {
@@ -26,53 +26,42 @@ type userResponse struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
-func newUserResponse(user db.User) userResponse {
-	return userResponse{
-		Username:          user.Username,
-		FullName:          user.FullName,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
-}
-
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
-	hashedPassword, err := util.HashPassword(req.Password)
+	user, err := server.ucase.User.Create(ctx, ucase.CreateUserRequest{
+		Username: req.Username,
+		FullName: req.FullName,
+		Email:    req.Email,
+		Password: req.Password,
+	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	arg := db.CreateUserParams{
-		Username:       req.Username,
-		FullName:       req.FullName,
-		Email:          req.Email,
-		HashedPassword: hashedPassword,
-	}
-
-	user, err := server.store.CreateUser(ctx, arg)
-	if err != nil {
-		if db.ErrorCode(err) == db.UniqueViolation {
-			ctx.JSON(http.StatusForbidden, errorResponse(err))
+		var validationErrors validation.Errors
+		if errors.As(err, &validationErrors) {
+			ctx.JSON(http.StatusUnprocessableEntity, responseError(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+
+		if errors.Is(err, ucase.ErrUserUniqueViolation) {
+			ctx.JSON(http.StatusUnprocessableEntity, responseError(err))
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, responseError(err))
 		return
 	}
 
-	rsp := newUserResponse(user)
+	rsp := convertUser(user)
 	ctx.JSON(http.StatusOK, rsp)
 }
 
 type loginUserRequest struct {
-	Username string `json:"username" binding:"required,alphanum"`
-	Password string `json:"password" binding:"required,min=8"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type loginUserResponse struct {
@@ -87,67 +76,39 @@ type loginUserResponse struct {
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
-	user, err := server.store.GetUser(ctx, req.Username)
-	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	err = util.CheckPassword(req.Password, user.HashedPassword)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
-
-	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
-		user.Username,
-		user.Role,
-		server.config.AccessTokenDuration,
-	)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	refreshToken, refreshPayload, err := server.tokenMaker.CreateToken(
-		user.Username,
-		user.Role,
-		server.config.RefreshTokenDuration,
-	)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
-	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
-		ID:           refreshPayload.ID,
-		Username:     user.Username,
-		RefreshToken: refreshToken,
-		UserAgent:    ctx.Request.UserAgent(),
-		ClientIp:     ctx.ClientIP(),
-		IsBlocked:    false,
-		ExpiresAt:    refreshPayload.ExpiredAt,
+	login, err := server.ucase.User.Login(ctx, ucase.LoginUserRequest{
+		Username:  req.Username,
+		Password:  req.Password,
+		UserAgent: ctx.Request.UserAgent(),
+		ClientIp:  ctx.ClientIP(),
 	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		code, err := translationError(err)
+		ctx.JSON(code, responseError(err))
 		return
 	}
 
 	rsp := loginUserResponse{
-		SessionID:             session.ID,
-		AccessToken:           accessToken,
-		AccessTokenExpiresAt:  accessPayload.ExpiredAt,
-		RefreshToken:          refreshToken,
-		RefreshTokenExpiresAt: refreshPayload.ExpiredAt,
-		User:                  newUserResponse(user),
+		SessionID:             login.SessionID,
+		AccessToken:           login.AccessToken,
+		AccessTokenExpiresAt:  login.AccessTokenExpiresAt,
+		RefreshToken:          login.RefreshToken,
+		RefreshTokenExpiresAt: login.RefreshTokenExpiresAt,
+		User:                  convertUser(&login.User),
 	}
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+func convertUser(user *ucase.UserResponse) userResponse {
+	return userResponse{
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
 }

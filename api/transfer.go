@@ -1,78 +1,106 @@
 package api
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
 )
 
 type transferRequest struct {
-	FromAccountID int64  `json:"from_account_id" binding:"required,min=1"`
-	ToAccountID   int64  `json:"to_account_id" binding:"required,min=1"`
-	Amount        int64  `json:"amount" binding:"required,gt=0"`
-	Currency      string `json:"currency" binding:"required,currency"`
+	FromAccountID int64  `json:"from_account_id"`
+	ToAccountID   int64  `json:"to_account_id"`
+	Amount        int64  `json:"amount"`
+	Currency      string `json:"currency"`
+}
+
+type transferResponse struct {
+	ID            int64     `json:"id"`
+	FromAccountID int64     `json:"from_account_id"`
+	ToAccountID   int64     `json:"to_account_id"`
+	Amount        int64     `json:"amount"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
+type entryResponse struct {
+	ID        int64              `json:"id"`
+	AccountID int64              `json:"account_id"`
+	Amount    int64              `json:"amount"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type transferResult struct {
+	Transfer    transferResponse `json:"transfer"`
+	FromAccount accountResponse  `json:"from_account"`
+	ToAccount   accountResponse  `json:"to_account"`
+	FromEntry   entryResponse    `json:"from_entry"`
+	ToEntry     entryResponse    `json:"to_entry"`
 }
 
 func (server *Server) createTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	fromAccount, isValid := server.validAccount(ctx, req.FromAccountID, req.Currency)
-	if !isValid {
+		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	if fromAccount.Owner != authPayload.Username {
-		err := errors.New("from account doesn't belong to the authenticated user")
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
 
-	_, isValid = server.validAccount(ctx, req.ToAccountID, req.Currency)
-	if !isValid {
-		return
-	}
-
-	arg := db.TransferTxParams{
+	result, err := server.ucase.Transaction.Transfer(ctx, ucase.TransferRequest{
+		Auth: ucase.AuthRequest{
+			Username: authPayload.Username,
+		},
 		FromAccountID: req.FromAccountID,
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
-	}
-
-	result, err := server.store.TransferTx(ctx, arg)
+		Currency:      req.Currency,
+	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, responseError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	rsp := convertTransferResult(result)
+	ctx.JSON(http.StatusOK, rsp)
 }
 
-func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
-	account, err := server.store.GetAccount(ctx, accountID)
-	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return account, false
-		}
-
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return account, false
+func convertTransferResult(result *ucase.TransferResult) *transferResult {
+	return &transferResult{
+		Transfer: transferResponse{
+			ID:            result.Transfer.ID,
+			FromAccountID: result.Transfer.FromAccountID,
+			ToAccountID:   result.Transfer.ToAccountID,
+			Amount:        result.Transfer.Amount,
+			CreatedAt:     result.Transfer.CreatedAt,
+		},
+		FromAccount: accountResponse{
+			ID:        result.FromAccount.ID,
+			Owner:     result.FromAccount.Owner,
+			Balance:   result.FromAccount.Balance,
+			Currency:  result.FromAccount.Currency,
+			CreatedAt: result.FromAccount.CreatedAt,
+		},
+		ToAccount: accountResponse{
+			ID:        result.ToAccount.ID,
+			Owner:     result.ToAccount.Owner,
+			Balance:   result.ToAccount.Balance,
+			Currency:  result.ToAccount.Currency,
+			CreatedAt: result.ToAccount.CreatedAt,
+		},
+		FromEntry: entryResponse{
+			ID:        result.FromEntry.ID,
+			AccountID: result.FromEntry.AccountID,
+			Amount:    result.FromEntry.Amount,
+			CreatedAt: result.FromEntry.CreatedAt,
+		},
+		ToEntry: entryResponse{
+			ID:        result.ToEntry.ID,
+			AccountID: result.ToEntry.AccountID,
+			Amount:    result.ToEntry.Amount,
+			CreatedAt: result.ToEntry.CreatedAt,
+		},
 	}
-
-	if account.Currency != currency {
-		err = fmt.Errorf("account [%d] currency mismatch: %s vs %s", account.ID, account.Currency, currency)
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return account, false
-	}
-
-	return account, true
 }

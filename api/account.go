@@ -1,112 +1,127 @@
 package api
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
 )
 
 type createAccountRequest struct {
-	Currency string `json:"currency" binding:"required,currency"`
+	Currency string `json:"currency"`
+}
+
+type accountResponse struct {
+	ID        int64     `json:"id"`
+	Owner     string    `json:"owner"`
+	Balance   int64     `json:"balance"`
+	Currency  string    `json:"currency"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	arg := db.CreateAccountParams{
-		Owner:    authPayload.Username,
+	account, err := server.ucase.Account.Create(ctx, ucase.CreateAccountRequest{
+		Auth: ucase.AuthRequest{
+			Username: authPayload.Username,
+		},
 		Currency: req.Currency,
-		Balance:  0,
-	}
-
-	account, err := server.store.CreateAccount(ctx, arg)
+	})
 	if err != nil {
-		errCode := db.ErrorCode(err)
-		if errCode == db.ForeignKeyViolation || errCode == db.UniqueViolation {
-			ctx.JSON(http.StatusForbidden, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		code, err := translationError(err)
+		ctx.JSON(code, responseError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, account)
+	rsp := convertAccount(account)
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type getAccountRequest struct {
-	ID int64 `uri:"id" binding:"required,min=1"`
+	ID int64 `uri:"id"`
 }
 
 func (server *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	account, err := server.store.GetAccount(ctx, req.ID)
-	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	if account.Owner != authPayload.Username {
-		err = errors.New("account doesn't belong to the authorized user")
-		ctx.JSON(http.StatusForbidden, errorResponse(err))
+
+	account, err := server.ucase.Account.Get(ctx, ucase.GetAccountRequest{
+		ID: req.ID,
+		Auth: ucase.AuthRequest{
+			Username: authPayload.Username,
+		},
+	})
+	if err != nil {
+		code, err := translationError(err)
+		ctx.JSON(code, responseError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, account)
+	rsp := convertAccount(account)
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type listAccountRequest struct {
-	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+	PageID   int32 `form:"page_id"`
+	PageSize int32 `form:"page_size"`
 }
 
 func (server *Server) listAccounts(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	if authPayload.Username == "" {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("unknown user")))
-	}
-
-	arg := db.ListAccountsParams{
-		Owner: pgtype.Text{
-			String: authPayload.Username,
-			Valid:  true,
+	accounts, err := server.ucase.Account.List(ctx, ucase.ListAccountRequest{
+		Auth: ucase.AuthRequest{
+			Username: authPayload.Username,
 		},
-		Limit:  req.PageSize,
-		Offset: (req.PageID - 1) * req.PageSize,
-	}
-	accounts, err := server.store.ListAccounts(ctx, arg)
+		Page: ucase.PagingRequest{
+			ID:   PageID(req.PageID),
+			Size: PageSize(req.PageSize),
+		},
+	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		code, err := translationError(err)
+		ctx.JSON(code, responseError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, accounts)
+	rsp := convertAccounts(accounts)
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+func convertAccount(account *ucase.AccountResponse) accountResponse {
+	return accountResponse{
+		ID:        account.ID,
+		Owner:     account.Owner,
+		Balance:   account.Balance,
+		Currency:  account.Currency,
+		CreatedAt: account.CreatedAt,
+	}
+}
+
+func convertAccounts(accounts []ucase.AccountResponse) []accountResponse {
+	var res []accountResponse
+	for _, account := range accounts {
+		res = append(res, convertAccount(&account))
+	}
+	return res
 }

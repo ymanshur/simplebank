@@ -81,7 +81,7 @@ func TestServer_GetAccount(t *testing.T) {
 			},
 		},
 		{
-			name:      "Bad Request",
+			name:      "Invalid ID",
 			accountID: 0,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
@@ -92,7 +92,7 @@ func TestServer_GetAccount(t *testing.T) {
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 	}
@@ -107,7 +107,7 @@ func TestServer_GetAccount(t *testing.T) {
 			testCase.buildStubs(store)
 
 			// start test server and send request
-			server := newTestServer(t, store)
+			server := newTestServer(t, store, nil)
 
 			recorder := httptest.NewRecorder()
 

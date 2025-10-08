@@ -79,7 +79,7 @@ func main() {
 	wg, ctx := errgroup.WithContext(ctx)
 
 	runTaskProcessor(ctx, wg, config, redisOpt, store)
-	runGinServer(ctx, wg, config, store)
+	runGinServer(ctx, wg, config, store, taskDistributor)
 	runGrpcServer(ctx, wg, config, store, taskDistributor)
 	runGrpcGatewayServer(ctx, wg, config, store, taskDistributor)
 
@@ -157,7 +157,13 @@ func runGrpcServer(ctx context.Context, waitGroup *errgroup.Group, config util.C
 	})
 }
 
-func runGrpcGatewayServer(ctx context.Context, waitGroup *errgroup.Group, config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+func runGrpcGatewayServer(
+	ctx context.Context,
+	waitGroup *errgroup.Group,
+	config util.Config,
+	store db.Store,
+	taskDistributor worker.TaskDistributor,
+) {
 	server, err := gapi.NewServer(config, store, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
@@ -219,8 +225,14 @@ func runGrpcGatewayServer(ctx context.Context, waitGroup *errgroup.Group, config
 	})
 }
 
-func runGinServer(ctx context.Context, waitGroup *errgroup.Group, config util.Config, store db.Store) {
-	server, err := api.NewServer(config, store)
+func runGinServer(
+	ctx context.Context,
+	waitGroup *errgroup.Group,
+	config util.Config,
+	store db.Store,
+	taskDistributor worker.TaskDistributor,
+) {
+	server, err := api.NewServer(config, store, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create HTTP server")
 	}
