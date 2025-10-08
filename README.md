@@ -300,7 +300,7 @@ make proto
 
 ## Tips
 
-### How to hit the endpoint using endpoints.http as a playground
+### How to hit the endpoint using [endpoints.http](docs/collection.http) as a playground
 
 1. Install [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension
 2. To control environment variables, add the following lines to .vscode/settings.json
