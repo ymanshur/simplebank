@@ -10,9 +10,10 @@ import (
 )
 
 type UseCase struct {
-	User    UserUseCase
-	Token   TokenUseCase
-	Account AccountUseCase
+	User        UserUseCase
+	Token       TokenUseCase
+	Account     AccountUseCase
+	Transaction TransactionUseCase
 }
 
 func NewUseCase(
@@ -22,9 +23,10 @@ func NewUseCase(
 	taskDistributor worker.TaskDistributor,
 ) UseCase {
 	return UseCase{
-		User:    NewUserUseCase(config, store, tokenMaker, taskDistributor),
-		Token:   NewTokenUseCase(config, store, tokenMaker),
-		Account: NewAccountUseCase(store),
+		User:        NewUserUseCase(config, store, tokenMaker, taskDistributor),
+		Token:       NewTokenUseCase(config, store, tokenMaker),
+		Account:     NewAccountUseCase(store),
+		Transaction: NewTransactionUseCase(store),
 	}
 }
 
@@ -42,4 +44,8 @@ type AccountUseCase interface {
 	Create(ctx context.Context, req CreateAccountRequest) (*AccountResponse, error)
 	Get(ctx context.Context, req GetAccountRequest) (*AccountResponse, error)
 	List(ctx context.Context, req ListAccountRequest) ([]AccountResponse, error)
+}
+
+type TransactionUseCase interface {
+	Transfer(ctx context.Context, req TransferRequest) (*TransferResult, error)
 }

@@ -69,16 +69,6 @@ type UserResponse struct {
 	CreatedAt         time.Time
 }
 
-func convertUser(user db.User) *UserResponse {
-	return &UserResponse{
-		Username:          user.Username,
-		FullName:          user.FullName,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
-}
-
 func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
 	if err := validation.Validate(&req); err != nil {
 		return nil, err
@@ -117,7 +107,7 @@ func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserRes
 	}
 
 	rsp := convertUser(txResult.User)
-	return rsp, nil
+	return &rsp, nil
 }
 
 type LoginUserRequest struct {
@@ -140,7 +130,7 @@ type LoginUserResponse struct {
 	AccessTokenExpiresAt  time.Time
 	RefreshToken          string
 	RefreshTokenExpiresAt time.Time
-	User                  *UserResponse
+	User                  UserResponse
 }
 
 func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUserResponse, error) {
@@ -281,5 +271,15 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 	}
 
 	rsp := convertUser(user)
-	return rsp, nil
+	return &rsp, nil
+}
+
+func convertUser(user db.User) UserResponse {
+	return UserResponse{
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
 }

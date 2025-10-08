@@ -82,14 +82,14 @@ func (u *accountUcase) Create(ctx context.Context, req CreateAccountRequest) (*A
 		return nil, errors.Wrap(err, "create account")
 	}
 
-	rsp := &AccountResponse{
+	rsp := AccountResponse{
 		ID:        account.ID,
 		Owner:     account.Owner,
 		Balance:   account.Balance,
 		Currency:  account.Currency,
 		CreatedAt: account.CreatedAt,
 	}
-	return rsp, nil
+	return &rsp, nil
 }
 
 type GetAccountRequest struct {
@@ -126,14 +126,14 @@ func (u *accountUcase) Get(ctx context.Context, req GetAccountRequest) (*Account
 		return nil, typex.ErrForbidden("account doesn't belong to the authorized user")
 	}
 
-	rsp := &AccountResponse{
+	rsp := AccountResponse{
 		ID:        account.ID,
 		Owner:     account.Owner,
 		Balance:   account.Balance,
 		Currency:  account.Currency,
 		CreatedAt: account.CreatedAt,
 	}
-	return rsp, nil
+	return &rsp, nil
 }
 
 type PagingRequest struct {
@@ -187,16 +187,20 @@ func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]Acco
 	return rsp, nil
 }
 
+func convertAccount(account db.Account) AccountResponse {
+	return AccountResponse{
+		ID:        account.ID,
+		Owner:     account.Owner,
+		Balance:   account.Balance,
+		Currency:  account.Currency,
+		CreatedAt: account.CreatedAt,
+	}
+}
+
 func convertAccounts(accounts []db.Account) []AccountResponse {
 	var res []AccountResponse
 	for _, account := range accounts {
-		res = append(res, AccountResponse{
-			ID:        account.ID,
-			Owner:     account.Owner,
-			Balance:   account.Balance,
-			Currency:  account.Currency,
-			CreatedAt: account.CreatedAt,
-		})
+		res = append(res, convertAccount(account))
 	}
 	return res
 }

@@ -87,9 +87,9 @@ func (u *tokenUcase) RenewAccessToken(ctx context.Context, req RenewAccessTokenR
 		return nil, errors.Wrap(err, "create token")
 	}
 
-	rsp := &RenewAccessTokenResponse{
+	rsp := RenewAccessTokenResponse{
 		Token:     accessToken,
 		ExpiresAt: accessPayload.ExpiredAt,
 	}
-	return rsp, nil
+	return &rsp, nil
 }
