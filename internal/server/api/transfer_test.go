@@ -12,8 +12,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
-	db "github.com/ymanshur/simplebank/internal/repo"
-	mockdb "github.com/ymanshur/simplebank/internal/repomock"
+	"github.com/ymanshur/simplebank/internal/repo"
+	mockdb "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/pkg/token"
 )
 
@@ -54,7 +54,7 @@ func TestServer_Transfer(t *testing.T) {
 				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
 				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(1).Return(account2, nil)
 
-				arg := db.TransferTxParams{
+				arg := repo.TransferTxParams{
 					FromAccountID: account1.ID,
 					ToAccountID:   account2.ID,
 					Amount:        amount,

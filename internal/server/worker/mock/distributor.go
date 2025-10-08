@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	asynq "github.com/hibiken/asynq"
-	worker "github.com/ymanshur/simplebank/pkg/worker"
+	worker "github.com/ymanshur/simplebank/internal/server/worker"
 )
 
 // MockTaskDistributor is a mock of TaskDistributor interface.

@@ -8,14 +8,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
-	"github.com/ymanshur/simplebank/pkg/worker"
 	"google.golang.org/grpc/metadata"
 )
 
-func newTestServer(t *testing.T, store db.Store, taskDistributor worker.TaskDistributor) *Server {
+func newTestServer(t *testing.T, store repo.Store, taskDistributor worker.TaskDistributor) *Server {
 	config := config.Config{
 		TokenSymmetricKey:   util.RandomString(32),
 		AccessTokenDuration: time.Minute,

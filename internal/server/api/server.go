@@ -10,11 +10,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
 // Server serves HTTP requests for our banking service.
@@ -27,7 +27,7 @@ type Server struct {
 }
 
 // NewServer creates a new HTTP server and set up routing.
-func NewServer(config config.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
+func NewServer(config config.Config, store repo.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)

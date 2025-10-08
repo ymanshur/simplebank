@@ -11,10 +11,10 @@ import (
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/worker"
 	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -27,7 +27,7 @@ type Server struct {
 	// UnimplementedSimpleBankServer enable forward compatibility
 	pb.UnimplementedSimpleBankServer
 	config          config.Config
-	store           db.Store
+	store           repo.Store
 	tokenMaker      token.Maker
 	rpc             *grpc.Server
 	gateway         *http.Server
@@ -36,7 +36,7 @@ type Server struct {
 }
 
 // NewServer creates a new gRPC server.
-func NewServer(config config.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
+func NewServer(config config.Config, store repo.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)

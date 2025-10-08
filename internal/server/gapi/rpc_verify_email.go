@@ -3,7 +3,7 @@ package gapi
 import (
 	"context"
 
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
 	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -16,7 +16,7 @@ func (server *Server) VerifyEmail(ctx context.Context, req *pb.VerifyEmailReques
 		return nil, invalidArgumentError(violations)
 	}
 
-	txResult, err := server.store.VerifyEmailTx(ctx, db.VerifyEmailTxParams{
+	txResult, err := server.store.VerifyEmailTx(ctx, repo.VerifyEmailTxParams{
 		EmailId:    req.GetEmailId(),
 		SecretCode: req.GetSecretCode(),
 	})

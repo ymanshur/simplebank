@@ -8,16 +8,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	"github.com/ymanshur/simplebank/internal/common"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
 )
 
 type accountUcase struct {
-	store db.Store
+	store repo.Store
 }
 
-func NewAccountUseCase(store db.Store) AccountUseCase {
+func NewAccountUseCase(store repo.Store) AccountUseCase {
 	return &accountUcase{
 		store: store,
 	}
@@ -66,7 +66,7 @@ func (u *accountUcase) Create(ctx context.Context, req CreateAccountRequest) (*A
 
 	// TODO: Create account with default balance,
 	// since there is not top-up API
-	arg := db.CreateAccountParams{
+	arg := repo.CreateAccountParams{
 		Owner:    req.Auth.Username,
 		Currency: req.Currency,
 		Balance:  0,
@@ -74,8 +74,8 @@ func (u *accountUcase) Create(ctx context.Context, req CreateAccountRequest) (*A
 
 	account, err := u.store.CreateAccount(ctx, arg)
 	if err != nil {
-		errCode := db.ErrorCode(err)
-		if errCode == db.ForeignKeyViolation || errCode == db.UniqueViolation {
+		errCode := repo.ErrorCode(err)
+		if errCode == repo.ForeignKeyViolation || errCode == repo.UniqueViolation {
 			return nil, typex.ErrUnProcessableEnity(err.Error())
 		}
 
@@ -115,7 +115,7 @@ func (u *accountUcase) Get(ctx context.Context, req GetAccountRequest) (*Account
 
 	account, err := u.store.GetAccount(ctx, req.ID)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
+		if errors.Is(err, repo.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("account")
 		}
 
@@ -169,7 +169,7 @@ func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]Acco
 		return nil, typex.ErrUnAuthorized("unknown user")
 	}
 
-	arg := db.ListAccountsParams{
+	arg := repo.ListAccountsParams{
 		Owner: pgtype.Text{
 			String: req.Auth.Username,
 			Valid:  true,
@@ -187,7 +187,7 @@ func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]Acco
 	return rsp, nil
 }
 
-func convertAccount(account db.Account) AccountResponse {
+func convertAccount(account repo.Account) AccountResponse {
 	return AccountResponse{
 		ID:        account.ID,
 		Owner:     account.Owner,
@@ -197,7 +197,7 @@ func convertAccount(account db.Account) AccountResponse {
 	}
 }
 
-func convertAccounts(accounts []db.Account) []AccountResponse {
+func convertAccounts(accounts []repo.Account) []AccountResponse {
 	var res []AccountResponse
 	for _, account := range accounts {
 		res = append(res, convertAccount(account))

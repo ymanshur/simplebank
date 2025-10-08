@@ -8,16 +8,16 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
 )
 
 type transactionUcase struct {
-	store db.Store
+	store repo.Store
 }
 
-func NewTransactionUseCase(store db.Store) TransactionUseCase {
+func NewTransactionUseCase(store repo.Store) TransactionUseCase {
 	return &transactionUcase{
 		store: store,
 	}
@@ -83,7 +83,7 @@ func (u *transactionUcase) Transfer(ctx context.Context, req TransferRequest) (*
 		return nil, err
 	}
 
-	arg := db.TransferTxParams{
+	arg := repo.TransferTxParams{
 		FromAccountID: req.FromAccountID,
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
@@ -98,10 +98,10 @@ func (u *transactionUcase) Transfer(ctx context.Context, req TransferRequest) (*
 	return &rsp, nil
 }
 
-func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, currency string) (db.Account, error) {
+func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, currency string) (repo.Account, error) {
 	account, err := u.store.GetAccount(ctx, accountID)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
+		if errors.Is(err, repo.ErrRecordNotFound) {
 			return account, typex.NewErrDataNotFound("account")
 		}
 
@@ -115,7 +115,7 @@ func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, cu
 	return account, nil
 }
 
-func convertTransfer(transfer db.Transfer) TransferResponse {
+func convertTransfer(transfer repo.Transfer) TransferResponse {
 	return TransferResponse{
 		ID:            transfer.ID,
 		FromAccountID: transfer.FromAccountID,
@@ -125,7 +125,7 @@ func convertTransfer(transfer db.Transfer) TransferResponse {
 	}
 }
 
-func convertEntry(entry db.Entry) EntryResponse {
+func convertEntry(entry repo.Entry) EntryResponse {
 	return EntryResponse{
 		ID:        entry.ID,
 		AccountID: entry.AccountID,
@@ -134,7 +134,7 @@ func convertEntry(entry db.Entry) EntryResponse {
 	}
 }
 
-func convertTransferResult(result db.TransferTxResult) TransferResult {
+func convertTransferResult(result repo.TransferTxResult) TransferResult {
 	return TransferResult{
 		Transfer:    convertTransfer(result.Transfer),
 		FromAccount: convertAccount(result.FromAccount),

@@ -10,11 +10,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
-	db "github.com/ymanshur/simplebank/internal/repo"
-	mockdb "github.com/ymanshur/simplebank/internal/repomock"
+	"github.com/ymanshur/simplebank/internal/repo"
+	mockdb "github.com/ymanshur/simplebank/internal/repo/mock"
+	"github.com/ymanshur/simplebank/internal/server/worker"
+	mockworker "github.com/ymanshur/simplebank/internal/server/worker/mock"
 	"github.com/ymanshur/simplebank/pkg/util"
-	"github.com/ymanshur/simplebank/pkg/worker"
-	mockworker "github.com/ymanshur/simplebank/pkg/worker/mock"
 	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -22,13 +22,13 @@ import (
 
 // eqCreateUserTxParamsMatcher is used to represent the valid or expected arguments to createUser method.
 type eqCreateUserTxParamsMatcher struct {
-	arg      db.CreateUserTxParams
+	arg      repo.CreateUserTxParams
 	password string
-	user     db.User
+	user     repo.User
 }
 
 func (expected eqCreateUserTxParamsMatcher) Matches(x interface{}) bool {
-	arg, ok := x.(db.CreateUserTxParams)
+	arg, ok := x.(repo.CreateUserTxParams)
 	if !ok {
 		return false
 	}
@@ -53,7 +53,7 @@ func (e eqCreateUserTxParamsMatcher) String() string {
 }
 
 // EqCreateUserTxParams returns a matcher that matches on CreateUserTxParams equality.
-func EqCreateUserTxParams(arg db.CreateUserTxParams, password string, user db.User) gomock.Matcher {
+func EqCreateUserTxParams(arg repo.CreateUserTxParams, password string, user repo.User) gomock.Matcher {
 	return eqCreateUserTxParamsMatcher{arg, password, user}
 }
 
@@ -75,8 +75,8 @@ func TestRPC_CreateUser(t *testing.T) {
 				Password: password,
 			},
 			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
-				arg := db.CreateUserTxParams{
-					CreateUserParams: db.CreateUserParams{
+				arg := repo.CreateUserTxParams{
+					CreateUserParams: repo.CreateUserParams{
 						Username:       user.Username,
 						FullName:       user.FullName,
 						Email:          user.Email,
@@ -87,7 +87,7 @@ func TestRPC_CreateUser(t *testing.T) {
 				store.EXPECT().
 					CreateUserTx(gomock.Any(), EqCreateUserTxParams(arg, password, user)).
 					Times(1).
-					Return(db.CreateUserTxResult{User: user}, nil)
+					Return(repo.CreateUserTxResult{User: user}, nil)
 
 				taskPayload := &worker.PayloadSendVerifyEmail{
 					Username: user.Username,
@@ -115,7 +115,7 @@ func TestRPC_CreateUser(t *testing.T) {
 				store.EXPECT().
 					CreateUserTx(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.CreateUserTxResult{}, sql.ErrConnDone)
+					Return(repo.CreateUserTxResult{}, sql.ErrConnDone)
 
 				taskDistributor.EXPECT().
 					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
@@ -155,12 +155,12 @@ func TestRPC_CreateUser(t *testing.T) {
 }
 
 // randomUser generate random user instance
-func randomUser(t *testing.T) (user db.User, password string) {
+func randomUser(t *testing.T) (user repo.User, password string) {
 	password = util.RandomString(8)
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
-	user = db.User{
+	user = repo.User{
 		Username:       util.RandomOwner(),
 		Role:           common.DepositorRole,
 		HashedPassword: hashedPassword,
@@ -171,7 +171,7 @@ func randomUser(t *testing.T) (user db.User, password string) {
 }
 
 // requireResMatchUser user response match assertions
-func requireResMatchUser(t *testing.T, res *pb.CreateUserResponse, user db.User) {
+func requireResMatchUser(t *testing.T, res *pb.CreateUserResponse, user repo.User) {
 	createdUser := res.GetUser()
 	require.Equal(t, user.Username, createdUser.Username)
 	require.Equal(t, user.FullName, createdUser.FullName)

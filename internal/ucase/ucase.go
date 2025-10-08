@@ -5,8 +5,8 @@ import (
 
 	"github.com/ymanshur/simplebank/config"
 	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
 type UseCase struct {

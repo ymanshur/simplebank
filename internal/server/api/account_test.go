@@ -14,8 +14,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
-	db "github.com/ymanshur/simplebank/internal/repo"
-	dbmock "github.com/ymanshur/simplebank/internal/repomock"
+	"github.com/ymanshur/simplebank/internal/repo"
+	dbmock "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
 )
@@ -59,7 +59,7 @@ func TestServer_GetAccount(t *testing.T) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
-					Return(db.Account{}, db.ErrRecordNotFound)
+					Return(repo.Account{}, repo.ErrRecordNotFound)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -75,7 +75,7 @@ func TestServer_GetAccount(t *testing.T) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
-					Return(db.Account{}, sql.ErrConnDone)
+					Return(repo.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -125,8 +125,8 @@ func TestServer_GetAccount(t *testing.T) {
 	}
 }
 
-func randomAccount(owner string) db.Account {
-	return db.Account{
+func randomAccount(owner string) repo.Account {
+	return repo.Account{
 		ID:       util.RandomInt(1, 1000),
 		Owner:    owner,
 		Balance:  util.RandomMoney(),
@@ -134,11 +134,11 @@ func randomAccount(owner string) db.Account {
 	}
 }
 
-func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account) {
+func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account repo.Account) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotAccount db.Account
+	var gotAccount repo.Account
 	err = json.Unmarshal(data, &gotAccount)
 	require.NoError(t, err)
 	require.Equal(t, account, gotAccount)

@@ -18,16 +18,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	statikFS "github.com/rakyll/statik/fs"
 	"github.com/rs/zerolog"
-	"github.com/ymanshur/simplebank/config"
-	"github.com/ymanshur/simplebank/internal/server/api"
-	"github.com/ymanshur/simplebank/pkg/mail"
-	"github.com/ymanshur/simplebank/pkg/worker"
-	pb "github.com/ymanshur/simplebank/proto"
-
 	"github.com/rs/zerolog/log"
+	"github.com/ymanshur/simplebank/config"
 	_ "github.com/ymanshur/simplebank/docs/statik"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/api"
 	"github.com/ymanshur/simplebank/internal/server/gapi"
+	"github.com/ymanshur/simplebank/internal/server/worker"
+	"github.com/ymanshur/simplebank/pkg/mail"
+	pb "github.com/ymanshur/simplebank/proto"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -66,7 +65,7 @@ func main() {
 
 	runDBMigration(config.DBMigrationURL, config.DBSource)
 
-	store := db.NewStore(conn)
+	store := repo.NewStore(conn)
 
 	redisOpt := asynq.RedisClientOpt{
 		Addr:     config.RedisAddress,
@@ -102,7 +101,7 @@ func runDBMigration(migrationURL string, dbSource string) {
 	log.Info().Msg("db migrated successfully")
 }
 
-func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config config.Config, redisOpt asynq.RedisClientOpt, store db.Store) {
+func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config config.Config, redisOpt asynq.RedisClientOpt, store repo.Store) {
 	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
 
 	taskProcessor := worker.NewRedisTaskProcessor(config, redisOpt, store, mailer)
@@ -127,7 +126,7 @@ func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config con
 	})
 }
 
-func runGrpcServer(ctx context.Context, waitGroup *errgroup.Group, config config.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+func runGrpcServer(ctx context.Context, waitGroup *errgroup.Group, config config.Config, store repo.Store, taskDistributor worker.TaskDistributor) {
 	server, err := gapi.NewServer(config, store, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create gRPC server")
@@ -161,7 +160,7 @@ func runGrpcGatewayServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
 	config config.Config,
-	store db.Store,
+	store repo.Store,
 	taskDistributor worker.TaskDistributor,
 ) {
 	server, err := gapi.NewServer(config, store, taskDistributor)
@@ -229,7 +228,7 @@ func runGinServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
 	config config.Config,
-	store db.Store,
+	store repo.Store,
 	taskDistributor worker.TaskDistributor,
 ) {
 	server, err := api.NewServer(config, store, taskDistributor)

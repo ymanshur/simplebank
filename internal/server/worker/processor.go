@@ -7,7 +7,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/pkg/mail"
 )
 
@@ -25,11 +25,11 @@ type TaskProcessor interface {
 type RedisTaskProcessor struct {
 	server *asynq.Server
 	config config.Config
-	store  db.Store
+	store  repo.Store
 	mailer mail.EmailSender
 }
 
-func NewRedisTaskProcessor(config config.Config, redisOpt asynq.RedisClientOpt, store db.Store, mailer mail.EmailSender) TaskProcessor {
+func NewRedisTaskProcessor(config config.Config, redisOpt asynq.RedisClientOpt, store repo.Store, mailer mail.EmailSender) TaskProcessor {
 	logger := NewLogger()
 
 	redis.SetLogger(logger)

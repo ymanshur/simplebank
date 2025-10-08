@@ -55,8 +55,8 @@ server:
 	go run main.go
 
 mock:
-	mockgen -package repomock -destination internal/repomock/store.go github.com/ymanshur/simplebank/internal/repo Store
-	mockgen -package mockworker -destination pkg/worker/mock/distributor.go github.com/ymanshur/simplebank/pkg/worker TaskDistributor
+	mockgen -package repomock -destination internal/repo/mock/store.go github.com/ymanshur/simplebank/internal/repo Store
+	mockgen -package workermock -destination pkg/worker/mock/distributor.go github.com/ymanshur/simplebank/pkg/worker TaskDistributor
 
 dbschema:
 	dbml2sql --postgres -o docs/schema.sql docs/db.dbml

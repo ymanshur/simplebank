@@ -11,12 +11,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/ymanshur/simplebank/config"
 	"github.com/ymanshur/simplebank/internal/common"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
-	"github.com/ymanshur/simplebank/pkg/worker"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,14 +27,14 @@ var (
 
 type userUcase struct {
 	config          config.Config
-	store           db.Store
+	store           repo.Store
 	tokenMaker      token.Maker
 	taskDistributor worker.TaskDistributor
 }
 
 func NewUserUseCase(
 	config config.Config,
-	store db.Store,
+	store repo.Store,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,
 ) UserUseCase {
@@ -80,14 +80,14 @@ func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserRes
 		return nil, errors.Wrap(err, "hash password")
 	}
 
-	arg := db.CreateUserTxParams{
-		CreateUserParams: db.CreateUserParams{
+	arg := repo.CreateUserTxParams{
+		CreateUserParams: repo.CreateUserParams{
 			Username:       req.Username,
 			FullName:       req.FullName,
 			Email:          req.Email,
 			HashedPassword: hashedPassword,
 		},
-		AfterCreate: func(user db.User) error {
+		AfterCreate: func(user repo.User) error {
 			taskPayload := worker.PayloadSendVerifyEmail{Username: user.Username}
 			taskOpts := []asynq.Option{
 				asynq.MaxRetry(10),
@@ -100,7 +100,7 @@ func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserRes
 
 	txResult, err := u.store.CreateUserTx(ctx, arg)
 	if err != nil {
-		if db.ErrorCode(err) == db.UniqueViolation {
+		if repo.ErrorCode(err) == repo.UniqueViolation {
 			return nil, typex.ErrUnProcessableEnity("user unique constraint violated")
 		}
 
@@ -141,7 +141,7 @@ func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUser
 
 	user, err := u.store.GetUser(ctx, req.Username)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
+		if errors.Is(err, repo.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("user")
 		}
 
@@ -175,7 +175,7 @@ func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUser
 		return nil, errors.Wrap(err, "create refresh token")
 	}
 
-	session, err := u.store.CreateSession(ctx, db.CreateSessionParams{
+	session, err := u.store.CreateSession(ctx, repo.CreateSessionParams{
 		ID:           refreshPayload.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
@@ -234,7 +234,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 		return nil, typex.ErrForbidden("cannot update other user's info")
 	}
 
-	arg := db.UpdateUserParams{
+	arg := repo.UpdateUserParams{
 		Username: req.Username,
 		FullName: pgtype.Text{
 			String: req.FullName,
@@ -265,7 +265,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 
 	user, err := u.store.UpdateUser(ctx, arg)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
+		if errors.Is(err, repo.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("user")
 		}
 		return nil, errors.Wrap(err, "update user")
@@ -275,7 +275,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 	return &rsp, nil
 }
 
-func convertUser(user db.User) UserResponse {
+func convertUser(user repo.User) UserResponse {
 	return UserResponse{
 		Username:          user.Username,
 		FullName:          user.FullName,
