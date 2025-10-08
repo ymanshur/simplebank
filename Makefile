@@ -40,6 +40,11 @@ migratedown1:
 migratecreate:
 	migrate create -ext sql -dir db/migration -seq $(name)
 
+migratedrop:
+	migrate -path db/migration -database "$(DB_SOURCE)" -verbose down -all
+
+migratereset: migratedrop migrateup
+
 sqlc:
 	sqlc generate
 
