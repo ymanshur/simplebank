@@ -1,12 +1,14 @@
 package gapi
 
 import (
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pb"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func convertUser(user db.User) *pb.User {
+func convertUser(user *ucase.UserResponse) *pb.User {
 	return &pb.User{
 		Username:          user.Username,
 		FullName:          user.FullName,
@@ -14,4 +16,11 @@ func convertUser(user db.User) *pb.User {
 		PasswordChangedAt: timestamppb.New(user.PasswordChangedAt),
 		CreatedAt:         timestamppb.New(user.CreatedAt),
 	}
+}
+
+func convertValidationErrors(validationErrors validation.Errors) (violations []*errdetails.BadRequest_FieldViolation) {
+	for field, err := range validationErrors {
+		violations = append(violations, fieldViolation(field, err))
+	}
+	return
 }

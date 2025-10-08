@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"runtime/debug"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
+	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pb"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
 	"github.com/ymanshur/simplebank/pkg/worker"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 // Server serves gRPC requests for our banking service.
@@ -27,6 +32,7 @@ type Server struct {
 	rpc             *grpc.Server
 	gateway         *http.Server
 	taskDistributor worker.TaskDistributor
+	ucase           ucase.UseCase
 }
 
 // NewServer creates a new gRPC server.
@@ -41,10 +47,23 @@ func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDi
 		store:           store,
 		tokenMaker:      tokenMaker,
 		taskDistributor: taskDistributor,
+		ucase:           ucase.NewUseCase(config, store, tokenMaker, taskDistributor),
 	}
 
-	grpcLogger := grpc.UnaryInterceptor(GrpcLogger)
-	server.rpc = grpc.NewServer(grpcLogger)
+	grpcPanicRecoveryHandler := func(p any) (err error) {
+		log.Error().
+			Any("panic", p).
+			Bytes("stack", debug.Stack()).
+			Msg("recovered from panic")
+
+		return status.Errorf(codes.Internal, "%s", p)
+	}
+	grpcRecovery := recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))
+
+	server.rpc = grpc.NewServer(grpc.ChainUnaryInterceptor(
+		GrpcLogger,
+		grpcRecovery,
+	))
 	pb.RegisterSimpleBankServer(server.rpc, server)
 
 	// Allows the gRPC client to explore available RPCs on the server
@@ -74,7 +93,7 @@ func (server *Server) Shutdown() {
 }
 
 func (server *Server) StartGateway(address string, allowedOrigins []string, mux *http.ServeMux) error {
-	handler := HttpLogger(mux)
+	handler := HttpLogger(HttpRecovery(mux))
 	handlerWithCORS := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedHeaders: []string{"*"},
