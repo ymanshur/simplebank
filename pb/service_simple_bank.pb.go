@@ -26,16 +26,16 @@ var File_service_simple_bank_proto protoreflect.FileDescriptor
 
 const file_service_simple_bank_proto_rawDesc = "" +
 	"\n" +
-	"\x19service_simple_bank.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a\x15rpc_create_user.proto\x1a\x15rpc_update_user.proto\x1a\x14rpc_login_user.proto\x1a\x16rpc_verify_email.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xd0\x04\n" +
+	"\x19service_simple_bank.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a\x15rpc_create_user.proto\x1a\x15rpc_update_user.proto\x1a\x14rpc_login_user.proto\x1a\x16rpc_verify_email.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xd9\x04\n" +
 	"\n" +
-	"SimpleBank\x12\x86\x01\n" +
+	"SimpleBank\x12\x8a\x01\n" +
 	"\n" +
-	"CreateUser\x12\x15.pb.CreateUserRequest\x1a\x16.pb.CreateUserResponse\"I\x92A2\x12\rCreate a user\x1a!Use this API to create a new user\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/users\x12~\n" +
+	"CreateUser\x12\x15.pb.CreateUserRequest\x1a\x16.pb.CreateUserResponse\"M\x92A0\x12\vCreate user\x1a!Use this API to create a new user\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/create_user\x12\x84\x01\n" +
 	"\n" +
-	"UpdateUser\x12\x15.pb.UpdateUserRequest\x1a\x16.pb.UpdateUserResponse\"A\x92A*\x12\vUpdate user\x1a\x1bUse this API to update user\x82\xd3\xe4\x93\x02\x0e:\x01*2\t/v1/users\x12\x9f\x01\n" +
+	"UpdateUser\x12\x15.pb.UpdateUserRequest\x1a\x16.pb.UpdateUserResponse\"G\x92A*\x12\vUpdate user\x1a\x1bUse this API to update user\x82\xd3\xe4\x93\x02\x14:\x01*2\x0f/v1/update_user\x12\x9f\x01\n" +
 	"\tLoginUser\x12\x14.pb.LoginUserRequest\x1a\x15.pb.LoginUserResponse\"e\x92AI\x12\n" +
-	"Login user\x1a;Use this API to login user and get access and refresh token\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/login_user\x12\x96\x01\n" +
-	"\vVerifyEmail\x12\x16.pb.VerifyEmailRequest\x1a\x17.pb.VerifyEmailResponse\"V\x92A;\x12\fVerify email\x1a+Use this API to verify user's email address\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/verify_emailB\x80\x01\x92AZ\x12X\n" +
+	"Login user\x1a;Use this API to login user and get access and refresh token\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/login_user\x12\x94\x01\n" +
+	"\vVerifyEmail\x12\x16.pb.VerifyEmailRequest\x1a\x17.pb.VerifyEmailResponse\"T\x92A:\x12\vVerify user\x1a+Use this API to verify user's email address\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/verify_userB\x80\x01\x92AZ\x12X\n" +
 	"\x0fSimple Bank API\"@\n" +
 	"\rYusuf Manshur\x12\x1bhttps://github.com/ymanshur\x1a\x12ymanshur@gmail.com2\x031.0Z!github.com/ymanshur/simplebank/pbb\x06proto3"
 

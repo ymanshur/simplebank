@@ -73,7 +73,7 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 	// TODO: replace gRPC Gateway URL with an environment variable that points to a front-end page
 	serverAddress := strings.Split(processor.config.GRPCGatewayServerAddress, ":")
 	serverPort := serverAddress[1]
-	verifyUrl := fmt.Sprintf("http://localhost:%s/v1/verify_email?email_id=%d&secret_code=%s",
+	verifyUrl := fmt.Sprintf("http://localhost:%s/v1/verify_user?email_id=%d&secret_code=%s",
 		serverPort, verifyEmail.ID, verifyEmail.SecretCode)
 	content := fmt.Sprintf(`Hello %s,<br/>
 	Thank you for registering with us!<br/>

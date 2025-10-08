@@ -21,6 +21,40 @@
     "application/json"
   ],
   "paths": {
+    "/v1/create_user": {
+      "post": {
+        "summary": "Create user",
+        "description": "Use this API to create a new user",
+        "operationId": "SimpleBank_CreateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbCreateUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbCreateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SimpleBank"
+        ]
+      }
+    },
     "/v1/login_user": {
       "post": {
         "summary": "Login user",
@@ -55,39 +89,7 @@
         ]
       }
     },
-    "/v1/users": {
-      "post": {
-        "summary": "Create a user",
-        "description": "Use this API to create a new user",
-        "operationId": "SimpleBank_CreateUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbCreateUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbCreateUserRequest"
-            }
-          }
-        ],
-        "tags": [
-          "SimpleBank"
-        ]
-      },
+    "/v1/update_user": {
       "patch": {
         "summary": "Update user",
         "description": "Use this API to update user",
@@ -121,9 +123,9 @@
         ]
       }
     },
-    "/v1/verify_email": {
+    "/v1/verify_user": {
       "get": {
-        "summary": "Verify email",
+        "summary": "Verify user",
         "description": "Use this API to verify user's email address",
         "operationId": "SimpleBank_VerifyEmail",
         "responses": {
