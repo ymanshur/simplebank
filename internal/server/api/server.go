@@ -9,17 +9,17 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/ymanshur/simplebank/config"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/util"
 	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	config     util.Config
+	config     config.Config
 	tokenMaker token.Maker
 	router     *gin.Engine
 	http       *http.Server
@@ -27,7 +27,7 @@ type Server struct {
 }
 
 // NewServer creates a new HTTP server and set up routing.
-func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
+func NewServer(config config.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)

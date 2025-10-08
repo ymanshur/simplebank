@@ -3,9 +3,9 @@ package ucase
 import (
 	"context"
 
+	"github.com/ymanshur/simplebank/config"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/util"
 	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
@@ -17,7 +17,7 @@ type UseCase struct {
 }
 
 func NewUseCase(
-	config util.Config,
+	config config.Config,
 	store db.Store,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,

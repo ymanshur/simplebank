@@ -7,19 +7,19 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/pkg/errors"
+	"github.com/ymanshur/simplebank/config"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/pkg/token"
-	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 type tokenUcase struct {
-	config     util.Config
+	config     config.Config
 	store      db.Store
 	tokenMaker token.Maker
 }
 
-func NewTokenUseCase(config util.Config, store db.Store, tokenMaker token.Maker) TokenUseCase {
+func NewTokenUseCase(config config.Config, store db.Store, tokenMaker token.Maker) TokenUseCase {
 	return &tokenUcase{
 		config:     config,
 		store:      store,

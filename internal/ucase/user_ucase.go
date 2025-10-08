@@ -9,6 +9,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
+	"github.com/ymanshur/simplebank/config"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/typex"
@@ -25,14 +26,14 @@ var (
 )
 
 type userUcase struct {
-	config          util.Config
+	config          config.Config
 	store           db.Store
 	tokenMaker      token.Maker
 	taskDistributor worker.TaskDistributor
 }
 
 func NewUserUseCase(
-	config util.Config,
+	config config.Config,
 	store db.Store,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,
