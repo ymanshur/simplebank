@@ -7,7 +7,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	db "github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/pkg/mail"
 )
 

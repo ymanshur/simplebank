@@ -9,9 +9,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	mockdb "github.com/ymanshur/simplebank/db/mock"
-	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
+	db "github.com/ymanshur/simplebank/internal/repo"
+	mockdb "github.com/ymanshur/simplebank/internal/repomock"
 	"github.com/ymanshur/simplebank/pkg/util"
 	"github.com/ymanshur/simplebank/pkg/worker"
 	mockworker "github.com/ymanshur/simplebank/pkg/worker/mock"

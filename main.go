@@ -25,8 +25,8 @@ import (
 	pb "github.com/ymanshur/simplebank/proto"
 
 	"github.com/rs/zerolog/log"
-	db "github.com/ymanshur/simplebank/db/sqlc"
 	_ "github.com/ymanshur/simplebank/docs/statik"
+	db "github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/server/gapi"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"

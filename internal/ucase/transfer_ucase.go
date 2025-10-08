@@ -8,7 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	db "github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
 )

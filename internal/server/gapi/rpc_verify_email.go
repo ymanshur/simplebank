@@ -3,7 +3,7 @@ package gapi
 import (
 	"context"
 
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	db "github.com/ymanshur/simplebank/internal/repo"
 	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"

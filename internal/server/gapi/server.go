@@ -11,7 +11,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/db/sqlc"
+	db "github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/worker"

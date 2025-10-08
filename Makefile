@@ -46,7 +46,7 @@ migratedrop:
 migratereset: migratedrop migrateup
 
 sqlc:
-	sqlc generate
+	sqlc generate -f db/db.yaml
 
 test:
 	go test -v -cover -short ./...
@@ -55,7 +55,7 @@ server:
 	go run main.go
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/ymanshur/simplebank/db/sqlc Store
+	mockgen -package repomock -destination internal/repomock/store.go github.com/ymanshur/simplebank/internal/repo Store
 	mockgen -package mockworker -destination pkg/worker/mock/distributor.go github.com/ymanshur/simplebank/pkg/worker TaskDistributor
 
 dbschema:
