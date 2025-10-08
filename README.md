@@ -238,7 +238,7 @@ make test
 
 Complete the necessary environment variables in the app.env (copy from [app.env.example](/app.env.example)) file.
 
-The following command will create PosgreSQL and Redis volume data in [tmp](tmp) directory and run the [docker-compose.yaml](docker-compose.yaml) file with build in detach mode.
+The following command will create PosgreSQL and Redis volume data in [tmp](tmp) directory and run the [docker-compose.yaml](deployment/docker-compose.yaml) file with build in detach mode.
 
 ```bash
 make containers

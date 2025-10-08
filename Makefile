@@ -96,7 +96,7 @@ run: build
 containers:
 	mkdir -p tmp/pgdata
 	mkdir -p tmp/redisdata
-	docker compose -f docker-compose.yaml up -d --build
+	docker compose -f deployment/docker-compose.yaml up -d --build
 
 # TOKEN_SYMMETRIC_KEY generator
 randhex64:
