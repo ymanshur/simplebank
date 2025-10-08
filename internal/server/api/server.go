@@ -6,9 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	db "github.com/ymanshur/simplebank/db/sqlc"
@@ -39,10 +37,6 @@ func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDi
 		config:     config,
 		tokenMaker: tokenMaker,
 		ucase:      ucase.NewUseCase(config, store, tokenMaker, taskDistributor),
-	}
-
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("currency", validCurrency)
 	}
 
 	server.setupRouter()

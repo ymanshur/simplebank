@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
 )
@@ -94,8 +95,8 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 			Username: authPayload.Username,
 		},
 		Page: ucase.PagingRequest{
-			ID:   PageID(req.PageID),
-			Size: PageSize(req.PageSize),
+			ID:   common.PageID(req.PageID),
+			Size: common.PageSize(req.PageSize),
 		},
 	})
 	if err != nil {

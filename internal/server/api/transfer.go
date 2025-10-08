@@ -59,7 +59,8 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		Currency:      req.Currency,
 	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, responseError(err))
+		code, err := translationError(err)
+		ctx.JSON(code, responseError(err))
 		return
 	}
 
