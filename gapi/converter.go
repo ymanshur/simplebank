@@ -3,7 +3,7 @@ package gapi
 import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/ymanshur/simplebank/internal/ucase"
-	"github.com/ymanshur/simplebank/pb"
+	"github.com/ymanshur/simplebank/proto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

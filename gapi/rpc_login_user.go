@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ymanshur/simplebank/internal/ucase"
-	"github.com/ymanshur/simplebank/pb"
+	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

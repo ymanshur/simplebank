@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/ymanshur/simplebank/db/mock"
 	db "github.com/ymanshur/simplebank/db/sqlc"
-	"github.com/ymanshur/simplebank/pb"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
+	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

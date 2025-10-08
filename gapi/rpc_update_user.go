@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ymanshur/simplebank/internal/ucase"
-	"github.com/ymanshur/simplebank/pb"
+	pb "github.com/ymanshur/simplebank/proto"
 )
 
 func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {

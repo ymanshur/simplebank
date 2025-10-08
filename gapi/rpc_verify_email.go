@@ -2,8 +2,9 @@ package gapi
 
 import (
 	"context"
+
 	db "github.com/ymanshur/simplebank/db/sqlc"
-	"github.com/ymanshur/simplebank/pb"
+	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
