@@ -39,7 +39,7 @@ var interuptSignals = []os.Signal{
 }
 
 func main() {
-	config, err := config.LoadConfig(".")
+	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}

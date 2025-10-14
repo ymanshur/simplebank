@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"github.com/ymanshur/simplebank/pkg/util"
 )
 
 // Config stores all configuration of the application.
@@ -29,8 +30,12 @@ type Config struct {
 }
 
 // LoadConfig reads configuration from file or environment variables.
-func LoadConfig(path string) (Config, error) {
-	viper.AddConfigPath(path)
+// It will read file in root of project.
+func LoadConfig() (Config, error) {
+	// projectRoot is default config path
+	projectRoot := util.RootDir()
+
+	viper.AddConfigPath(projectRoot)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env") // json, yml, etc.
 
