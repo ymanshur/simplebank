@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/repo"
-	mockdb "github.com/ymanshur/simplebank/internal/repo/mock"
+	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
 	pb "github.com/ymanshur/simplebank/proto"
@@ -28,7 +28,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 	testCases := []struct {
 		name          string
 		req           *pb.UpdateUserRequest
-		buildStubs    func(store *mockdb.MockStore)
+		buildStubs    func(mrepo *mockrepo.MockRepo)
 		buildContext  func(t *testing.T, tokenMaker token.Maker) context.Context
 		checkResponse func(t *testing.T, res *pb.UpdateUserResponse, err error)
 	}{
@@ -39,7 +39,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 				FullName: &newName,
 				Email:    &newEmail,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				arg := repo.UpdateUserParams{
 					FullName: pgtype.Text{
 						String: newName,
@@ -62,7 +62,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 					IsEmailVerified:   user.IsEmailVerified,
 				}
 
-				store.EXPECT().
+				mrepo.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(updatedUser, nil)
@@ -86,8 +86,8 @@ func TestRPC_UpdateUser(t *testing.T) {
 				FullName: &newName,
 				Email:    &newEmail,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(repo.User{}, repo.ErrRecordNotFound)
@@ -109,8 +109,8 @@ func TestRPC_UpdateUser(t *testing.T) {
 				FullName: &newName,
 				Email:    &invalidEmail,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
@@ -131,8 +131,8 @@ func TestRPC_UpdateUser(t *testing.T) {
 				FullName: &newName,
 				Email:    &newEmail,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
@@ -153,8 +153,8 @@ func TestRPC_UpdateUser(t *testing.T) {
 				FullName: &newName,
 				Email:    &newEmail,
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
@@ -174,7 +174,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			storeCtrl := gomock.NewController(t)
 			defer storeCtrl.Finish()
-			store := mockdb.NewMockStore(storeCtrl)
+			store := mockrepo.NewMockRepo(storeCtrl)
 
 			tc.buildStubs(store)
 

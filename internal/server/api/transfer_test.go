@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
-	mockdb "github.com/ymanshur/simplebank/internal/repo/mock"
+	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/pkg/token"
 )
 
@@ -36,7 +36,7 @@ func TestServer_Transfer(t *testing.T) {
 		name          string
 		body          gin.H
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-		buildStubs    func(store *mockdb.MockStore)
+		buildStubs    func(mrepo *mockrepo.MockRepo)
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -50,16 +50,16 @@ func TestServer_Transfer(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user1.Username, user1.Role, time.Minute)
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(1).Return(account2, nil)
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
+				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(1).Return(account2, nil)
 
 				arg := repo.TransferTxParams{
 					FromAccountID: account1.ID,
 					ToAccountID:   account2.ID,
 					Amount:        amount,
 				}
-				store.EXPECT().TransferTx(gomock.Any(), gomock.Eq(arg)).Times(1)
+				mrepo.EXPECT().TransferTx(gomock.Any(), gomock.Eq(arg)).Times(1)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -76,10 +76,10 @@ func TestServer_Transfer(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user2.Username, user2.Role, time.Minute)
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(0)
-				store.EXPECT().TransferTx(gomock.Any(), gomock.Any()).Times(0)
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
+				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(0)
+				mrepo.EXPECT().TransferTx(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusForbidden, recorder.Code)
@@ -96,10 +96,10 @@ func TestServer_Transfer(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user3.Username, user3.Role, time.Minute)
 			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account3.ID)).Times(1).Return(account3, nil)
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(0)
-				store.EXPECT().TransferTx(gomock.Any(), gomock.Any()).Times(0)
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account3.ID)).Times(1).Return(account3, nil)
+				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account2.ID)).Times(0)
+				mrepo.EXPECT().TransferTx(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
@@ -112,7 +112,7 @@ func TestServer_Transfer(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mockdb.NewMockStore(ctrl)
+			store := mockrepo.NewMockRepo(ctrl)
 			// build stubs
 			testCase.buildStubs(store)
 

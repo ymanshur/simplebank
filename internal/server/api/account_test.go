@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
-	dbmock "github.com/ymanshur/simplebank/internal/repo/mock"
+	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
 )
@@ -29,7 +29,7 @@ func TestServer_GetAccount(t *testing.T) {
 		name          string
 		accountID     int64
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-		buildStubs    func(store *dbmock.MockStore)
+		buildStubs    func(mrepo *mockrepo.MockRepo)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -38,8 +38,8 @@ func TestServer_GetAccount(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
-			buildStubs: func(store *dbmock.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
 					Return(account, nil)
@@ -55,8 +55,8 @@ func TestServer_GetAccount(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
-			buildStubs: func(store *dbmock.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
 					Return(repo.Account{}, repo.ErrRecordNotFound)
@@ -71,8 +71,8 @@ func TestServer_GetAccount(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
-			buildStubs: func(store *dbmock.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
 					Return(repo.Account{}, sql.ErrConnDone)
@@ -87,8 +87,8 @@ func TestServer_GetAccount(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
-			buildStubs: func(store *dbmock.MockStore) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo) {
+				mrepo.EXPECT().
 					GetAccount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
@@ -103,7 +103,7 @@ func TestServer_GetAccount(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := dbmock.NewMockStore(ctrl)
+			store := mockrepo.NewMockRepo(ctrl)
 			// build stubs
 			testCase.buildStubs(store)
 

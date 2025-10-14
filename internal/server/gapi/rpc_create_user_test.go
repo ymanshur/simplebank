@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
-	mockdb "github.com/ymanshur/simplebank/internal/repo/mock"
+	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/internal/server/worker"
 	mockworker "github.com/ymanshur/simplebank/internal/server/worker/mock"
 	"github.com/ymanshur/simplebank/pkg/util"
@@ -63,7 +63,7 @@ func TestRPC_CreateUser(t *testing.T) {
 	testCases := []struct {
 		name          string
 		req           *pb.CreateUserRequest
-		buildStubs    func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor)
+		buildStubs    func(mrepo *mockrepo.MockRepo, taskDistributor *mockworker.MockTaskDistributor)
 		checkResponse func(t *testing.T, res *pb.CreateUserResponse, err error)
 	}{
 		{
@@ -74,7 +74,7 @@ func TestRPC_CreateUser(t *testing.T) {
 				Email:    user.Email,
 				Password: password,
 			},
-			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
+			buildStubs: func(mrepo *mockrepo.MockRepo, taskDistributor *mockworker.MockTaskDistributor) {
 				arg := repo.CreateUserTxParams{
 					CreateUserParams: repo.CreateUserParams{
 						Username:       user.Username,
@@ -84,7 +84,7 @@ func TestRPC_CreateUser(t *testing.T) {
 					},
 				}
 
-				store.EXPECT().
+				mrepo.EXPECT().
 					CreateUserTx(gomock.Any(), EqCreateUserTxParams(arg, password, user)).
 					Times(1).
 					Return(repo.CreateUserTxResult{User: user}, nil)
@@ -111,8 +111,8 @@ func TestRPC_CreateUser(t *testing.T) {
 				Email:    user.Email,
 				Password: password,
 			},
-			buildStubs: func(store *mockdb.MockStore, taskDistributor *mockworker.MockTaskDistributor) {
-				store.EXPECT().
+			buildStubs: func(mrepo *mockrepo.MockRepo, taskDistributor *mockworker.MockTaskDistributor) {
+				mrepo.EXPECT().
 					CreateUserTx(gomock.Any(), gomock.Any()).
 					Times(1).
 					Return(repo.CreateUserTxResult{}, sql.ErrConnDone)
@@ -134,7 +134,7 @@ func TestRPC_CreateUser(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			storeCtrl := gomock.NewController(t)
 			defer storeCtrl.Finish()
-			store := mockdb.NewMockStore(storeCtrl)
+			store := mockrepo.NewMockRepo(storeCtrl)
 
 			taskCtrl := gomock.NewController(t)
 			defer taskCtrl.Finish()
