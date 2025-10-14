@@ -1,5 +1,5 @@
 ### Create a user
-POST http://{{authority}}/v1/users HTTP/1.1
+POST http://{{authority}}/api/users HTTP/1.1
 Accept: */*
 Content-Type: application/json
 
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### Create an account
-POST http://{{authority}}/v1/accounts
+POST http://{{authority}}/api/accounts
 Accept: */*
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -21,19 +21,19 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Get an account by id
-GET http://{{authority}}/v1/accounts/1
+GET http://{{authority}}/api/accounts/1
 Accept: */*
 Authorization: Bearer {{accessToken}}
 
 ### List accounts
-GET http://{{authority}}/v1/accounts
+GET http://{{authority}}/api/accounts
     ?page_id=1
     &page_size=5
 Accept: */*
 Authorization: Bearer {{accessToken}}
 
 ### Transfer money
-POST http://{{authority}}/v1/transfers
+POST http://{{authority}}/api/transfers
 Accept: */*
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -46,7 +46,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Login user
-POST http://{{authority}}/v1/login_user
+POST http://{{authority}}/api/login_user
 Accept: */*
 Content-Type: application/json
 
@@ -56,7 +56,7 @@ Content-Type: application/json
 }
 
 ### Renew access token
-POST http://{{authority}}/v1/renew_access_token
+POST http://{{authority}}/api/renew_access_token
 Accept: */*
 Content-Type: application/json
 

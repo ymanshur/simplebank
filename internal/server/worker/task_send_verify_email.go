@@ -21,10 +21,15 @@ type taskSendVerifyEmail struct {
 	repo   repo.Repo
 	mailer mail.EmailSender
 
-	verifyEmail ucase.VerifyEmailUseCase
+	verifyEmail ucase.VerifyEmailUcase
 }
 
-func NewTaskSendVerifyEmail(config config.Config, repo repo.Repo, mailer mail.EmailSender, verifyEmail ucase.VerifyEmailUseCase) Task {
+func NewTaskSendVerifyEmail(
+	config config.Config,
+	repo repo.Repo,
+	mailer mail.EmailSender,
+	verifyEmail ucase.VerifyEmailUcase,
+) Task {
 	return &taskSendVerifyEmail{
 		config:      config,
 		repo:        repo,
@@ -54,7 +59,7 @@ func (t *taskSendVerifyEmail) Handler(ctx context.Context, payload []byte) error
 	// TODO: replace gRPC Gateway URL with an environment variable that points to a front-end page
 	serverAddress := strings.Split(t.config.GRPCGatewayServerAddress, ":")
 	serverPort := serverAddress[1]
-	verifyUrl := fmt.Sprintf("http://localhost:%s/v1/verify_user?email_id=%d&secret_code=%s",
+	verifyUrl := fmt.Sprintf("http://localhost:%s/api/verify_user?email_id=%d&secret_code=%s",
 		serverPort, verifyEmail.ID, verifyEmail.SecretCode)
 	content := fmt.Sprintf(`Hello %s,<br/>
 	Thank you for registering with us!<br/>

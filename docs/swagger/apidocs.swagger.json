@@ -21,7 +21,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/create_user": {
+    "/api/create_user": {
       "post": {
         "summary": "Create user",
         "description": "Use this API to create a new user",
@@ -55,7 +55,7 @@
         ]
       }
     },
-    "/v1/login_user": {
+    "/api/login_user": {
       "post": {
         "summary": "Login user",
         "description": "Use this API to login user and get access and refresh token",
@@ -89,7 +89,7 @@
         ]
       }
     },
-    "/v1/update_user": {
+    "/api/update_user": {
       "patch": {
         "summary": "Update user",
         "description": "Use this API to update user",
@@ -123,7 +123,7 @@
         ]
       }
     },
-    "/v1/verify_user": {
+    "/api/verify_user": {
       "get": {
         "summary": "Verify user",
         "description": "Use this API to verify user's email address",
