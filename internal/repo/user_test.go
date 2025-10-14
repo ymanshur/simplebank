@@ -21,7 +21,7 @@ func createRandomUser(t *testing.T) User {
 		HashedPassword: hashedPassword,
 	}
 
-	user, err := testStore.CreateUser(context.Background(), arg)
+	user, err := testRepo.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -42,7 +42,7 @@ func TestQueries_CreateUser(t *testing.T) {
 
 func TestQueries_GetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := testStore.GetUser(context.Background(), user1.Username)
+	user2, err := testRepo.GetUser(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -58,7 +58,7 @@ func TestQueries_UpdateUser_FullName(t *testing.T) {
 	oldUser := createRandomUser(t)
 
 	newFullName := util.RandomOwner()
-	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testRepo.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		FullName: pgtype.Text{
 			String: newFullName,

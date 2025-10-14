@@ -27,20 +27,20 @@ var (
 
 type userUcase struct {
 	config          config.Config
-	store           repo.Store
+	repo            repo.Repo
 	tokenMaker      token.Maker
 	taskDistributor worker.TaskDistributor
 }
 
 func NewUserUseCase(
 	config config.Config,
-	store repo.Store,
+	repo repo.Repo,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,
 ) UserUseCase {
 	return &userUcase{
 		config:          config,
-		store:           store,
+		repo:            repo,
 		tokenMaker:      tokenMaker,
 		taskDistributor: taskDistributor,
 	}
@@ -98,7 +98,7 @@ func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserRes
 		},
 	}
 
-	txResult, err := u.store.CreateUserTx(ctx, arg)
+	txResult, err := u.repo.CreateUserTx(ctx, arg)
 	if err != nil {
 		if repo.ErrorCode(err) == repo.UniqueViolation {
 			return nil, typex.ErrUnProcessableEnity("user unique constraint violated")
@@ -139,7 +139,7 @@ func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUser
 		return nil, err
 	}
 
-	user, err := u.store.GetUser(ctx, req.Username)
+	user, err := u.repo.GetUser(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, repo.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("user")
@@ -175,7 +175,7 @@ func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUser
 		return nil, errors.Wrap(err, "create refresh token")
 	}
 
-	session, err := u.store.CreateSession(ctx, repo.CreateSessionParams{
+	session, err := u.repo.CreateSession(ctx, repo.CreateSessionParams{
 		ID:           refreshPayload.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
@@ -263,7 +263,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 		}
 	}
 
-	user, err := u.store.UpdateUser(ctx, arg)
+	user, err := u.repo.UpdateUser(ctx, arg)
 	if err != nil {
 		if errors.Is(err, repo.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("user")

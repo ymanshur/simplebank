@@ -25,11 +25,11 @@ type TaskProcessor interface {
 type RedisTaskProcessor struct {
 	server *asynq.Server
 	config config.Config
-	store  repo.Store
+	store  repo.Repo
 	mailer mail.EmailSender
 }
 
-func NewRedisTaskProcessor(config config.Config, redisOpt asynq.RedisClientOpt, store repo.Store, mailer mail.EmailSender) TaskProcessor {
+func NewRedisTaskProcessor(config config.Config, redisOpt asynq.RedisClientOpt, repo repo.Repo, mailer mail.EmailSender) TaskProcessor {
 	logger := NewLogger()
 
 	redis.SetLogger(logger)
@@ -55,7 +55,7 @@ func NewRedisTaskProcessor(config config.Config, redisOpt asynq.RedisClientOpt, 
 	return &RedisTaskProcessor{
 		server: server,
 		config: config,
-		store:  store,
+		store:  repo,
 		mailer: mailer,
 	}
 }

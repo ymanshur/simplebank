@@ -15,14 +15,14 @@ import (
 
 type tokenUcase struct {
 	config     config.Config
-	store      db.Store
+	repo       db.Repo
 	tokenMaker token.Maker
 }
 
-func NewTokenUseCase(config config.Config, store db.Store, tokenMaker token.Maker) TokenUseCase {
+func NewTokenUseCase(config config.Config, repo db.Repo, tokenMaker token.Maker) TokenUseCase {
 	return &tokenUcase{
 		config:     config,
-		store:      store,
+		repo:       repo,
 		tokenMaker: tokenMaker,
 	}
 }
@@ -52,7 +52,7 @@ func (u *tokenUcase) RenewAccessToken(ctx context.Context, req RenewAccessTokenR
 		return nil, typex.ErrUnAuthorized(err.Error())
 	}
 
-	session, err := u.store.GetSession(ctx, refreshPayload.ID)
+	session, err := u.repo.GetSession(ctx, refreshPayload.ID)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("token")

@@ -16,10 +16,10 @@ type VerifyEmailTxResult struct {
 	VerifyEmail VerifyEmail
 }
 
-func (store *SQLStore) VerifyEmailTx(ctx context.Context, arg VerifyEmailTxParams) (VerifyEmailTxResult, error) {
+func (r *repoQuery) VerifyEmailTx(ctx context.Context, arg VerifyEmailTxParams) (VerifyEmailTxResult, error) {
 	var result VerifyEmailTxResult
 
-	err := store.execTx(ctx, func(q *Queries) error {
+	err := r.execTx(ctx, func(q *Queries) error {
 		var err error
 
 		result.VerifyEmail, err = q.UpdateVerifyEmail(ctx, UpdateVerifyEmailParams{

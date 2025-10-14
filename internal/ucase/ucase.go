@@ -18,7 +18,7 @@ type UseCase struct {
 
 func NewUseCase(
 	config config.Config,
-	store db.Store,
+	store db.Repo,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,
 ) UseCase {

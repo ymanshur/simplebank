@@ -20,11 +20,11 @@ type TransferTxResult struct {
 
 // TransferTx performs a money transfer from one account to the other.
 // It creates a transfer record, add account entries, and update account's balance within a single database transaction.
-func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (r *repoQuery) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	// TODO: Use generic type to return the callback function result instead of function closure.
 	var result TransferTxResult
 
-	err := store.execTx(ctx, func(q *Queries) error {
+	err := r.execTx(ctx, func(q *Queries) error {
 		var err error
 
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{

@@ -10,7 +10,7 @@ import (
 	"github.com/ymanshur/simplebank/config"
 )
 
-var testStore Store
+var testRepo Repo
 
 func TestMain(m *testing.M) {
 	config, err := config.LoadConfig("../..")
@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	testStore = NewStore(db)
+	testRepo = NewRepo(db)
 
 	os.Exit(m.Run())
 }

@@ -65,7 +65,7 @@ func main() {
 
 	runDBMigration(config.DBMigrationURL, config.DBSource)
 
-	store := repo.NewStore(conn)
+	store := repo.NewRepo(conn)
 
 	redisOpt := asynq.RedisClientOpt{
 		Addr:     config.RedisAddress,
@@ -101,10 +101,10 @@ func runDBMigration(migrationURL string, dbSource string) {
 	log.Info().Msg("db migrated successfully")
 }
 
-func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config config.Config, redisOpt asynq.RedisClientOpt, store repo.Store) {
+func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config config.Config, redisOpt asynq.RedisClientOpt, repo repo.Repo) {
 	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
 
-	taskProcessor := worker.NewRedisTaskProcessor(config, redisOpt, store, mailer)
+	taskProcessor := worker.NewRedisTaskProcessor(config, redisOpt, repo, mailer)
 
 	log.Info().Msg("start task processor")
 
@@ -126,8 +126,8 @@ func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config con
 	})
 }
 
-func runGrpcServer(ctx context.Context, waitGroup *errgroup.Group, config config.Config, store repo.Store, taskDistributor worker.TaskDistributor) {
-	server, err := gapi.NewServer(config, store, taskDistributor)
+func runGrpcServer(ctx context.Context, waitGroup *errgroup.Group, config config.Config, repo repo.Repo, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(config, repo, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create gRPC server")
 	}
@@ -160,10 +160,10 @@ func runGrpcGatewayServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
 	config config.Config,
-	store repo.Store,
+	repo repo.Repo,
 	taskDistributor worker.TaskDistributor,
 ) {
-	server, err := gapi.NewServer(config, store, taskDistributor)
+	server, err := gapi.NewServer(config, repo, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
@@ -228,10 +228,10 @@ func runGinServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
 	config config.Config,
-	store repo.Store,
+	repo repo.Repo,
 	taskDistributor worker.TaskDistributor,
 ) {
-	server, err := api.NewServer(config, store, taskDistributor)
+	server, err := api.NewServer(config, repo, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create HTTP server")
 	}

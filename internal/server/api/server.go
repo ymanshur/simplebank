@@ -27,7 +27,7 @@ type Server struct {
 }
 
 // NewServer creates a new HTTP server and set up routing.
-func NewServer(config config.Config, store repo.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
+func NewServer(config config.Config, repo repo.Repo, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -36,7 +36,7 @@ func NewServer(config config.Config, store repo.Store, taskDistributor worker.Ta
 	server := &Server{
 		config:     config,
 		tokenMaker: tokenMaker,
-		ucase:      ucase.NewUseCase(config, store, tokenMaker, taskDistributor),
+		ucase:      ucase.NewUseCase(config, repo, tokenMaker, taskDistributor),
 	}
 
 	server.setupRouter()

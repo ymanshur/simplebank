@@ -15,13 +15,13 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func newTestServer(t *testing.T, store repo.Store, taskDistributor worker.TaskDistributor) *Server {
+func newTestServer(t *testing.T, repo repo.Repo, taskDistributor worker.TaskDistributor) *Server {
 	config := config.Config{
 		TokenSymmetricKey:   util.RandomString(32),
 		AccessTokenDuration: time.Minute,
 	}
 
-	server, err := NewServer(config, store, taskDistributor)
+	server, err := NewServer(config, repo, taskDistributor)
 	require.NoError(t, err)
 
 	return server

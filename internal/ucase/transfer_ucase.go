@@ -14,12 +14,12 @@ import (
 )
 
 type transactionUcase struct {
-	store repo.Store
+	repo repo.Repo
 }
 
-func NewTransactionUseCase(store repo.Store) TransactionUseCase {
+func NewTransactionUseCase(repo repo.Repo) TransactionUseCase {
 	return &transactionUcase{
-		store: store,
+		repo: repo,
 	}
 }
 
@@ -89,7 +89,7 @@ func (u *transactionUcase) Transfer(ctx context.Context, req TransferRequest) (*
 		Amount:        req.Amount,
 	}
 
-	result, err := u.store.TransferTx(ctx, arg)
+	result, err := u.repo.TransferTx(ctx, arg)
 	if err != nil {
 		return nil, errors.Wrap(err, "transfer")
 	}
@@ -99,7 +99,7 @@ func (u *transactionUcase) Transfer(ctx context.Context, req TransferRequest) (*
 }
 
 func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, currency string) (repo.Account, error) {
-	account, err := u.store.GetAccount(ctx, accountID)
+	account, err := u.repo.GetAccount(ctx, accountID)
 	if err != nil {
 		if errors.Is(err, repo.ErrRecordNotFound) {
 			return account, typex.NewErrDataNotFound("account")

@@ -7,33 +7,33 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Store defines all functions to execute db queries and transactions
-type Store interface {
+// Repo defines all functions to execute db queries and transactions
+type Repo interface {
 	Querier
 	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
 	CreateUserTx(ctx context.Context, arg CreateUserTxParams) (CreateUserTxResult, error)
 	VerifyEmailTx(ctx context.Context, arg VerifyEmailTxParams) (VerifyEmailTxResult, error)
 }
 
-// SQLStore provides all functions to execute SQL queries and transactions
-type SQLStore struct {
+// repoQuery provides all functions to execute SQL queries and transactions
+type repoQuery struct {
 	db *pgxpool.Pool
 
 	// composition
 	*Queries
 }
 
-// NewStore creates a new Store
-func NewStore(db *pgxpool.Pool) Store {
-	return &SQLStore{
+// NewRepo creates a new Repo
+func NewRepo(db *pgxpool.Pool) Repo {
+	return &repoQuery{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
 // execTx executes a function within a database transaction
-func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := store.db.Begin(ctx)
+func (r *repoQuery) execTx(ctx context.Context, fn func(*Queries) error) error {
+	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
 	}

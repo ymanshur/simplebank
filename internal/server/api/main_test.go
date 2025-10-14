@@ -13,7 +13,7 @@ import (
 	"github.com/ymanshur/simplebank/pkg/util"
 )
 
-func newTestServer(t *testing.T, store db.Store, taskDistributor worker.TaskDistributor) *Server {
+func newTestServer(t *testing.T, store db.Repo, taskDistributor worker.TaskDistributor) *Server {
 	config := config.Config{
 		TokenSymmetricKey:   util.RandomString(32),
 		AccessTokenDuration: time.Minute,

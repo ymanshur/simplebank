@@ -14,12 +14,12 @@ import (
 )
 
 type accountUcase struct {
-	store repo.Store
+	repo repo.Repo
 }
 
-func NewAccountUseCase(store repo.Store) AccountUseCase {
+func NewAccountUseCase(repo repo.Repo) AccountUseCase {
 	return &accountUcase{
-		store: store,
+		repo: repo,
 	}
 }
 
@@ -72,7 +72,7 @@ func (u *accountUcase) Create(ctx context.Context, req CreateAccountRequest) (*A
 		Balance:  0,
 	}
 
-	account, err := u.store.CreateAccount(ctx, arg)
+	account, err := u.repo.CreateAccount(ctx, arg)
 	if err != nil {
 		errCode := repo.ErrorCode(err)
 		if errCode == repo.ForeignKeyViolation || errCode == repo.UniqueViolation {
@@ -113,7 +113,7 @@ func (u *accountUcase) Get(ctx context.Context, req GetAccountRequest) (*Account
 		return nil, typex.ErrUnAuthorized("unknown user")
 	}
 
-	account, err := u.store.GetAccount(ctx, req.ID)
+	account, err := u.repo.GetAccount(ctx, req.ID)
 	if err != nil {
 		if errors.Is(err, repo.ErrRecordNotFound) {
 			return nil, typex.NewErrDataNotFound("account")
@@ -178,7 +178,7 @@ func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]Acco
 		Offset: (req.Page.ID - 1) * req.Page.Size,
 	}
 
-	accounts, err := u.store.ListAccounts(ctx, arg)
+	accounts, err := u.repo.ListAccounts(ctx, arg)
 	if err != nil {
 		return nil, errors.Wrap(err, "list accounts")
 	}
