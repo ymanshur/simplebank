@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/config"
 	"github.com/ymanshur/simplebank/internal/repo"
-	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/pkg/worker"
 	"google.golang.org/grpc/metadata"
 )
 

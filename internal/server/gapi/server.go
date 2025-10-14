@@ -12,9 +12,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
 	"github.com/ymanshur/simplebank/internal/repo"
-	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
+	"github.com/ymanshur/simplebank/pkg/worker"
 	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,6 +26,7 @@ import (
 type Server struct {
 	// UnimplementedSimpleBankServer enable forward compatibility
 	pb.UnimplementedSimpleBankServer
+
 	config          config.Config
 	store           repo.Repo
 	tokenMaker      token.Maker

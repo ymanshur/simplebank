@@ -13,11 +13,13 @@ import (
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
-	"github.com/ymanshur/simplebank/internal/server/worker"
+	taskpresent "github.com/ymanshur/simplebank/internal/server/worker/presentation"
+	"github.com/ymanshur/simplebank/internal/server/worker/tasktype"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/pkg/worker"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -89,13 +91,14 @@ func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserRes
 			HashedPassword: hashedPassword,
 		},
 		AfterCreate: func(user db.User) error {
-			taskPayload := worker.PayloadSendVerifyEmail{Username: user.Username}
+			taskName := tasktype.SendVerifyEmail
+			taskPayload := taskpresent.SendVerifyEmailPayload{Username: user.Username}
 			taskOpts := []asynq.Option{
 				asynq.MaxRetry(10),
 				asynq.ProcessIn(10 * time.Second),
 				asynq.Queue(worker.QueueCritical),
 			}
-			return u.taskDistributor.DistributeTaskSendVerifyEmail(ctx, &taskPayload, taskOpts...)
+			return u.taskDistributor.Distribute(ctx, taskName, taskPayload, taskOpts...)
 		},
 	}
 

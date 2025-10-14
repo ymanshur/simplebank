@@ -13,9 +13,10 @@ import (
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
 	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
-	"github.com/ymanshur/simplebank/internal/server/worker"
-	mockworker "github.com/ymanshur/simplebank/internal/server/worker/mock"
+	taskpresent "github.com/ymanshur/simplebank/internal/server/worker/presentation"
+	"github.com/ymanshur/simplebank/internal/server/worker/tasktype"
 	"github.com/ymanshur/simplebank/pkg/util"
+	mockworker "github.com/ymanshur/simplebank/pkg/worker/mock"
 	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -90,11 +91,12 @@ func TestRPC_CreateUser(t *testing.T) {
 					Times(1).
 					Return(repo.CreateUserTxResult{User: user}, nil)
 
-				taskPayload := &worker.PayloadSendVerifyEmail{
+				taskName := tasktype.SendVerifyEmail
+				taskPayload := taskpresent.SendVerifyEmailPayload{
 					Username: user.Username,
 				}
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), taskPayload, gomock.Any()).
+					Distribute(gomock.Any(), taskName, taskPayload, gomock.Any()).
 					Times(1).
 					Return(nil)
 			},
@@ -119,7 +121,7 @@ func TestRPC_CreateUser(t *testing.T) {
 					Return(repo.CreateUserTxResult{}, sql.ErrConnDone)
 
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Distribute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateUserResponse, err error) {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/ymanshur/simplebank/config"
 	db "github.com/ymanshur/simplebank/internal/repo"
-	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/pkg/token"
+	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
 type UseCase struct {
@@ -14,19 +14,20 @@ type UseCase struct {
 	Token       TokenUseCase
 	Account     AccountUseCase
 	Transaction TransactionUseCase
+	VerifyEmail VerifyEmailUseCase
 }
 
 func NewUseCase(
 	config config.Config,
-	store db.Repo,
+	repo db.Repo,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,
 ) UseCase {
 	return UseCase{
-		User:        NewUserUseCase(config, store, tokenMaker, taskDistributor),
-		Token:       NewTokenUseCase(config, store, tokenMaker),
-		Account:     NewAccountUseCase(store),
-		Transaction: NewTransactionUseCase(store),
+		User:        NewUserUseCase(config, repo, tokenMaker, taskDistributor),
+		Token:       NewTokenUseCase(config, repo, tokenMaker),
+		Account:     NewAccountUseCase(repo),
+		Transaction: NewTransactionUseCase(repo),
 	}
 }
 
@@ -48,4 +49,8 @@ type AccountUseCase interface {
 
 type TransactionUseCase interface {
 	Transfer(ctx context.Context, req TransferRequest) (*TransferResult, error)
+}
+
+type VerifyEmailUseCase interface {
+	Create(ctx context.Context, req CreateVerifyEmailRequest) (*CreateVerifyEmailResponse, error)
 }

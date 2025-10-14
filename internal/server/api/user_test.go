@@ -17,9 +17,10 @@ import (
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/repo"
 	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
-	"github.com/ymanshur/simplebank/internal/server/worker"
-	mockworker "github.com/ymanshur/simplebank/internal/server/worker/mock"
+	taskpresent "github.com/ymanshur/simplebank/internal/server/worker/presentation"
+	"github.com/ymanshur/simplebank/internal/server/worker/tasktype"
 	"github.com/ymanshur/simplebank/pkg/util"
+	mockworker "github.com/ymanshur/simplebank/pkg/worker/mock"
 )
 
 // eqCreateUserTxParamsMatcher is used to represent the valid or expected arguments to createUser method.
@@ -91,11 +92,12 @@ func TestServer_CreateUser(t *testing.T) {
 					Times(1).
 					Return(repo.CreateUserTxResult{User: user}, nil)
 
-				taskPayload := &worker.PayloadSendVerifyEmail{
+				taskName := tasktype.SendVerifyEmail
+				taskPayload := taskpresent.SendVerifyEmailPayload{
 					Username: user.Username,
 				}
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), taskPayload, gomock.Any()).
+					Distribute(gomock.Any(), taskName, taskPayload, gomock.Any()).
 					Times(1).
 					Return(nil)
 			},
@@ -120,7 +122,7 @@ func TestServer_CreateUser(t *testing.T) {
 					Return(repo.CreateUserTxResult{}, sql.ErrConnDone)
 
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Distribute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -142,7 +144,7 @@ func TestServer_CreateUser(t *testing.T) {
 					Return(repo.CreateUserTxResult{}, repo.ErrUniqueViolation)
 
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Distribute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -163,7 +165,7 @@ func TestServer_CreateUser(t *testing.T) {
 					Times(0)
 
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Distribute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -184,7 +186,7 @@ func TestServer_CreateUser(t *testing.T) {
 					Times(0)
 
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Distribute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -205,7 +207,7 @@ func TestServer_CreateUser(t *testing.T) {
 					Times(0)
 
 				taskDistributor.EXPECT().
-					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Distribute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {

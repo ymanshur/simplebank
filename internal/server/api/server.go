@@ -11,18 +11,18 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
 	"github.com/ymanshur/simplebank/internal/repo"
-	"github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
+	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
+	http       *http.Server
+	router     *gin.Engine
 	config     config.Config
 	tokenMaker token.Maker
-	router     *gin.Engine
-	http       *http.Server
 	ucase      ucase.UseCase
 }
 

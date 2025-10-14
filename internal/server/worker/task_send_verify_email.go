@@ -8,62 +8,43 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
-	db "github.com/ymanshur/simplebank/db/sqlc"
-	"github.com/ymanshur/simplebank/pkg/util"
+	"github.com/ymanshur/simplebank/config"
+	"github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/server/worker/presentation"
+	"github.com/ymanshur/simplebank/internal/server/worker/tasktype"
+	"github.com/ymanshur/simplebank/internal/ucase"
+	"github.com/ymanshur/simplebank/pkg/mail"
 )
 
-const TaskSendVerifyEmail = "task:send_verify_email"
+type taskSendVerifyEmail struct {
+	config config.Config
+	repo   repo.Repo
+	mailer mail.EmailSender
 
-type PayloadSendVerifyEmail struct {
-	Username string `json:"username"`
+	verifyEmail ucase.VerifyEmailUseCase
 }
 
-func (distributor *RedisTaskDistributor) DistributeTaskSendVerifyEmail(
-	ctx context.Context,
-	payload *PayloadSendVerifyEmail,
-	opts ...asynq.Option,
-) error {
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal task payload: %w", err)
+func NewTaskSendVerifyEmail(config config.Config, repo repo.Repo, mailer mail.EmailSender, verifyEmail ucase.VerifyEmailUseCase) Task {
+	return &taskSendVerifyEmail{
+		config:      config,
+		repo:        repo,
+		mailer:      mailer,
+		verifyEmail: verifyEmail,
 	}
-
-	task := asynq.NewTask(TaskSendVerifyEmail, jsonPayload, opts...)
-
-	info, err := distributor.client.EnqueueContext(ctx, task)
-	if err != nil {
-		return fmt.Errorf("failed to enqueue task: %w", err)
-	}
-
-	log.Info().
-		Str("type", task.Type()).
-		Bytes("payload", task.Payload()).
-		Str("queue", info.Queue).
-		Int("max_retry", info.MaxRetry).
-		Msg("enqueued task")
-	return nil
 }
 
-func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, task *asynq.Task) error {
-	var payload PayloadSendVerifyEmail
-	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
+func (t *taskSendVerifyEmail) Name() string {
+	return tasktype.SendVerifyEmail
+}
+
+func (t *taskSendVerifyEmail) Handler(ctx context.Context, payload []byte) error {
+	var p presentation.SendVerifyEmailPayload
+	if err := json.Unmarshal(payload, &p); err != nil {
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	user, err := processor.store.GetUser(ctx, payload.Username)
-	if err != nil {
-		// Make compensation if DB transaction need more than
-		// the time processor takes the task
-		//if errors.Is(err, db.ErrRecordNotFound) {
-		//	return fmt.Errorf("user doesn't exist: %w", asynq.SkipRetry)
-		//}
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-
-	verifyEmail, err := processor.store.CreateVerifyEmail(ctx, db.CreateVerifyEmailParams{
-		Username:   user.Username,
-		Email:      user.Email,
-		SecretCode: util.RandomString(32),
+	verifyEmail, err := t.verifyEmail.Create(ctx, ucase.CreateVerifyEmailRequest{
+		Username: p.Username,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create verify email: %w", err)
@@ -71,25 +52,25 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 
 	subject := "Welcome to Simple Bank"
 	// TODO: replace gRPC Gateway URL with an environment variable that points to a front-end page
-	serverAddress := strings.Split(processor.config.GRPCGatewayServerAddress, ":")
+	serverAddress := strings.Split(t.config.GRPCGatewayServerAddress, ":")
 	serverPort := serverAddress[1]
 	verifyUrl := fmt.Sprintf("http://localhost:%s/v1/verify_user?email_id=%d&secret_code=%s",
 		serverPort, verifyEmail.ID, verifyEmail.SecretCode)
 	content := fmt.Sprintf(`Hello %s,<br/>
 	Thank you for registering with us!<br/>
 	Please <a href="%s">click here</a> to verify your email address.<br/>
-	`, user.FullName, verifyUrl)
-	to := []string{user.Email}
+	`, verifyEmail.FullName, verifyUrl)
+	to := []string{verifyEmail.Email}
 
-	err = processor.mailer.SendEmail(subject, content, to, nil, nil, nil)
+	err = t.mailer.SendEmail(subject, content, to, nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf("failed to send verify email: %w", err)
 	}
 
 	log.Info().
-		Str("type", task.Type()).
-		Bytes("payload", task.Payload()).
-		Str("email", user.Email).
+		Str("type", t.Name()).
+		Bytes("payload", payload).
+		Str("email", verifyEmail.Email).
 		Msg("processed task")
 	return nil
 }

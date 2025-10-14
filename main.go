@@ -24,8 +24,9 @@ import (
 	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/server/api"
 	"github.com/ymanshur/simplebank/internal/server/gapi"
-	"github.com/ymanshur/simplebank/internal/server/worker"
+	processor "github.com/ymanshur/simplebank/internal/server/worker"
 	"github.com/ymanshur/simplebank/pkg/mail"
+	"github.com/ymanshur/simplebank/pkg/worker"
 	pb "github.com/ymanshur/simplebank/proto"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -104,7 +105,7 @@ func runDBMigration(migrationURL string, dbSource string) {
 func runTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config config.Config, redisOpt asynq.RedisClientOpt, repo repo.Repo) {
 	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
 
-	taskProcessor := worker.NewRedisTaskProcessor(config, redisOpt, repo, mailer)
+	taskProcessor := processor.NewServer(config, repo, mailer, redisOpt)
 
 	log.Info().Msg("start task processor")
 
