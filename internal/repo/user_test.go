@@ -7,14 +7,15 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/pkg/util"
 )
 
-func createRandomUser(t *testing.T) User {
+func createRandomUser(t *testing.T) db.User {
 	hashedPassword, err := util.HashPassword(util.RandomString(8))
 	require.NoError(t, err)
 
-	arg := CreateUserParams{
+	arg := db.CreateUserParams{
 		Username:       util.RandomOwner(),
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),
@@ -40,7 +41,7 @@ func TestQueries_CreateUser(t *testing.T) {
 	createRandomUser(t)
 }
 
-func TestQueries_GetUser(t *testing.T) {
+func TestRepo_GetUser(t *testing.T) {
 	user1 := createRandomUser(t)
 	user2, err := testRepo.GetUser(context.Background(), user1.Username)
 	require.NoError(t, err)
@@ -54,11 +55,11 @@ func TestQueries_GetUser(t *testing.T) {
 	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
 }
 
-func TestQueries_UpdateUser_FullName(t *testing.T) {
+func TestRepo_UpdateUser_FullName(t *testing.T) {
 	oldUser := createRandomUser(t)
 
 	newFullName := util.RandomOwner()
-	updatedUser, err := testRepo.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testRepo.UpdateUser(context.Background(), db.UpdateUserParams{
 		Username: oldUser.Username,
 		FullName: pgtype.Text{
 			String: newFullName,

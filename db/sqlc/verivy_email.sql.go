@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: verivy_email.sql
 
-package repo
+package db
 
 import (
 	"context"

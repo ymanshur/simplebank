@@ -8,6 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/validator"
@@ -98,7 +99,7 @@ func (u *transactionUcase) Transfer(ctx context.Context, req TransferRequest) (*
 	return &rsp, nil
 }
 
-func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, currency string) (repo.Account, error) {
+func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, currency string) (db.Account, error) {
 	account, err := u.repo.GetAccount(ctx, accountID)
 	if err != nil {
 		if errors.Is(err, repo.ErrRecordNotFound) {
@@ -115,7 +116,7 @@ func (u *transactionUcase) validAccount(ctx context.Context, accountID int64, cu
 	return account, nil
 }
 
-func convertTransfer(transfer repo.Transfer) TransferResponse {
+func convertTransfer(transfer db.Transfer) TransferResponse {
 	return TransferResponse{
 		ID:            transfer.ID,
 		FromAccountID: transfer.FromAccountID,
@@ -125,7 +126,7 @@ func convertTransfer(transfer repo.Transfer) TransferResponse {
 	}
 }
 
-func convertEntry(entry repo.Entry) EntryResponse {
+func convertEntry(entry db.Entry) EntryResponse {
 	return EntryResponse{
 		ID:        entry.ID,
 		AccountID: entry.AccountID,

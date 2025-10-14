@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/pkg/util"
 )
 
-func createRandomAccount(t *testing.T) Account {
+func createRandomAccount(t *testing.T) db.Account {
 	user := createRandomUser(t)
 
-	arg := CreateAccountParams{
+	arg := db.CreateAccountParams{
 		Owner:    user.Username,
 		Balance:  util.RandomMoney(),
 		Currency: common.RandomCurrency(),
@@ -33,11 +34,11 @@ func createRandomAccount(t *testing.T) Account {
 	return account
 }
 
-func TestQueries_CreateAccount(t *testing.T) {
+func TestRepo_CreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
 
-func TestQueries_GetAccount(t *testing.T) {
+func TestRepo_GetAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 	account2, err := testRepo.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
@@ -50,10 +51,10 @@ func TestQueries_GetAccount(t *testing.T) {
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 
-func TestQueries_UpdateAccount(t *testing.T) {
+func TestRepo_UpdateAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 
-	arg := UpdateAccountParams{
+	arg := db.UpdateAccountParams{
 		ID:      account1.ID,
 		Balance: util.RandomMoney(),
 	}
@@ -69,7 +70,7 @@ func TestQueries_UpdateAccount(t *testing.T) {
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 
-func TestQueries_DeleteAccount(t *testing.T) {
+func TestRepo_DeleteAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 	err := testRepo.DeleteAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
@@ -80,12 +81,12 @@ func TestQueries_DeleteAccount(t *testing.T) {
 	require.Empty(t, account2)
 }
 
-func TestQueries_ListAccounts(t *testing.T) {
+func TestRepo_ListAccounts(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		createRandomAccount(t)
 	}
 
-	arg := ListAccountsParams{
+	arg := db.ListAccountsParams{
 		Limit:  5,
 		Offset: 0,
 	}

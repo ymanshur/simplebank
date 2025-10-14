@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
 	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
@@ -24,7 +25,7 @@ import (
 type eqCreateUserTxParamsMatcher struct {
 	arg      repo.CreateUserTxParams
 	password string
-	user     repo.User
+	user     db.User
 }
 
 func (expected eqCreateUserTxParamsMatcher) Matches(x interface{}) bool {
@@ -53,7 +54,7 @@ func (e eqCreateUserTxParamsMatcher) String() string {
 }
 
 // EqCreateUserTxParams returns a matcher that matches on CreateUserTxParams equality.
-func EqCreateUserTxParams(arg repo.CreateUserTxParams, password string, user repo.User) gomock.Matcher {
+func EqCreateUserTxParams(arg repo.CreateUserTxParams, password string, user db.User) gomock.Matcher {
 	return eqCreateUserTxParamsMatcher{arg, password, user}
 }
 
@@ -76,7 +77,7 @@ func TestRPC_CreateUser(t *testing.T) {
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo, taskDistributor *mockworker.MockTaskDistributor) {
 				arg := repo.CreateUserTxParams{
-					CreateUserParams: repo.CreateUserParams{
+					CreateUserParams: db.CreateUserParams{
 						Username:       user.Username,
 						FullName:       user.FullName,
 						Email:          user.Email,
@@ -155,12 +156,12 @@ func TestRPC_CreateUser(t *testing.T) {
 }
 
 // randomUser generate random user instance
-func randomUser(t *testing.T) (user repo.User, password string) {
+func randomUser(t *testing.T) (user db.User, password string) {
 	password = util.RandomString(8)
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
-	user = repo.User{
+	user = db.User{
 		Username:       util.RandomOwner(),
 		Role:           common.DepositorRole,
 		HashedPassword: hashedPassword,
@@ -171,7 +172,7 @@ func randomUser(t *testing.T) (user repo.User, password string) {
 }
 
 // requireResMatchUser user response match assertions
-func requireResMatchUser(t *testing.T, res *pb.CreateUserResponse, user repo.User) {
+func requireResMatchUser(t *testing.T, res *pb.CreateUserResponse, user db.User) {
 	createdUser := res.GetUser()
 	require.Equal(t, user.Username, createdUser.Username)
 	require.Equal(t, user.FullName, createdUser.FullName)

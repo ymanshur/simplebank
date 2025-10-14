@@ -8,6 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/repo"
 	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/pkg/token"
@@ -40,7 +41,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 				Email:    &newEmail,
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
-				arg := repo.UpdateUserParams{
+				arg := db.UpdateUserParams{
 					FullName: pgtype.Text{
 						String: newName,
 						Valid:  true,
@@ -52,7 +53,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 					Username: user.Username,
 				}
 
-				updatedUser := repo.User{
+				updatedUser := db.User{
 					Username:          user.Username,
 					FullName:          newName,
 					Email:             newEmail,
@@ -90,7 +91,7 @@ func TestRPC_UpdateUser(t *testing.T) {
 				mrepo.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(repo.User{}, repo.ErrRecordNotFound)
+					Return(db.User{}, repo.ErrRecordNotFound)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
 				return newContextWithBearerToken(t, tokenMaker, user.Username, user.Role, time.Minute)

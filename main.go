@@ -65,7 +65,7 @@ func main() {
 
 	runDBMigration(config.DBMigrationURL, config.DBSource)
 
-	store := repo.NewRepo(conn)
+	repo := repo.NewRepo(conn)
 
 	redisOpt := asynq.RedisClientOpt{
 		Addr:     config.RedisAddress,
@@ -77,10 +77,10 @@ func main() {
 
 	wg, ctx := errgroup.WithContext(ctx)
 
-	runTaskProcessor(ctx, wg, config, redisOpt, store)
-	runGinServer(ctx, wg, config, store, taskDistributor)
-	runGrpcServer(ctx, wg, config, store, taskDistributor)
-	runGrpcGatewayServer(ctx, wg, config, store, taskDistributor)
+	runTaskProcessor(ctx, wg, config, redisOpt, repo)
+	runGinServer(ctx, wg, config, repo, taskDistributor)
+	runGrpcServer(ctx, wg, config, repo, taskDistributor)
+	runGrpcGatewayServer(ctx, wg, config, repo, taskDistributor)
 
 	err = wg.Wait()
 	if err != nil {

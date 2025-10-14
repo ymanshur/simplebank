@@ -7,6 +7,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/typex"
@@ -66,7 +67,7 @@ func (u *accountUcase) Create(ctx context.Context, req CreateAccountRequest) (*A
 
 	// TODO: Create account with default balance,
 	// since there is not top-up API
-	arg := repo.CreateAccountParams{
+	arg := db.CreateAccountParams{
 		Owner:    req.Auth.Username,
 		Currency: req.Currency,
 		Balance:  0,
@@ -169,7 +170,7 @@ func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]Acco
 		return nil, typex.ErrUnAuthorized("unknown user")
 	}
 
-	arg := repo.ListAccountsParams{
+	arg := db.ListAccountsParams{
 		Owner: pgtype.Text{
 			String: req.Auth.Username,
 			Valid:  true,
@@ -187,7 +188,7 @@ func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]Acco
 	return rsp, nil
 }
 
-func convertAccount(account repo.Account) AccountResponse {
+func convertAccount(account db.Account) AccountResponse {
 	return AccountResponse{
 		ID:        account.ID,
 		Owner:     account.Owner,
@@ -197,7 +198,7 @@ func convertAccount(account repo.Account) AccountResponse {
 	}
 }
 
-func convertAccounts(accounts []repo.Account) []AccountResponse {
+func convertAccounts(accounts []db.Account) []AccountResponse {
 	var res []AccountResponse
 	for _, account := range accounts {
 		res = append(res, convertAccount(account))

@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: session.sql
 
-package repo
+package db
 
 import (
 	"context"

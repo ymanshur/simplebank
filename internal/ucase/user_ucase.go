@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	"github.com/ymanshur/simplebank/config"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/internal/server/worker"
@@ -81,13 +82,13 @@ func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserRes
 	}
 
 	arg := repo.CreateUserTxParams{
-		CreateUserParams: repo.CreateUserParams{
+		CreateUserParams: db.CreateUserParams{
 			Username:       req.Username,
 			FullName:       req.FullName,
 			Email:          req.Email,
 			HashedPassword: hashedPassword,
 		},
-		AfterCreate: func(user repo.User) error {
+		AfterCreate: func(user db.User) error {
 			taskPayload := worker.PayloadSendVerifyEmail{Username: user.Username}
 			taskOpts := []asynq.Option{
 				asynq.MaxRetry(10),
@@ -175,7 +176,7 @@ func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUser
 		return nil, errors.Wrap(err, "create refresh token")
 	}
 
-	session, err := u.repo.CreateSession(ctx, repo.CreateSessionParams{
+	session, err := u.repo.CreateSession(ctx, db.CreateSessionParams{
 		ID:           refreshPayload.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
@@ -234,7 +235,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 		return nil, typex.ErrForbidden("cannot update other user's info")
 	}
 
-	arg := repo.UpdateUserParams{
+	arg := db.UpdateUserParams{
 		Username: req.Username,
 		FullName: pgtype.Text{
 			String: req.FullName,
@@ -275,7 +276,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 	return &rsp, nil
 }
 
-func convertUser(user repo.User) UserResponse {
+func convertUser(user db.User) UserResponse {
 	return UserResponse{
 		Username:          user.Username,
 		FullName:          user.FullName,

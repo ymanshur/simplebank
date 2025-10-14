@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	repo "github.com/ymanshur/simplebank/internal/repo"
 )
 
@@ -37,10 +38,10 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 }
 
 // AddAccountBalance mocks base method.
-func (m *MockRepo) AddAccountBalance(arg0 context.Context, arg1 repo.AddAccountBalanceParams) (repo.Account, error) {
+func (m *MockRepo) AddAccountBalance(arg0 context.Context, arg1 db.AddAccountBalanceParams) (db.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddAccountBalance", arg0, arg1)
-	ret0, _ := ret[0].(repo.Account)
+	ret0, _ := ret[0].(db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -52,10 +53,10 @@ func (mr *MockRepoMockRecorder) AddAccountBalance(arg0, arg1 interface{}) *gomoc
 }
 
 // CreateAccount mocks base method.
-func (m *MockRepo) CreateAccount(arg0 context.Context, arg1 repo.CreateAccountParams) (repo.Account, error) {
+func (m *MockRepo) CreateAccount(arg0 context.Context, arg1 db.CreateAccountParams) (db.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", arg0, arg1)
-	ret0, _ := ret[0].(repo.Account)
+	ret0, _ := ret[0].(db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -67,10 +68,10 @@ func (mr *MockRepoMockRecorder) CreateAccount(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // CreateEntry mocks base method.
-func (m *MockRepo) CreateEntry(arg0 context.Context, arg1 repo.CreateEntryParams) (repo.Entry, error) {
+func (m *MockRepo) CreateEntry(arg0 context.Context, arg1 db.CreateEntryParams) (db.Entry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateEntry", arg0, arg1)
-	ret0, _ := ret[0].(repo.Entry)
+	ret0, _ := ret[0].(db.Entry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -82,10 +83,10 @@ func (mr *MockRepoMockRecorder) CreateEntry(arg0, arg1 interface{}) *gomock.Call
 }
 
 // CreateSession mocks base method.
-func (m *MockRepo) CreateSession(arg0 context.Context, arg1 repo.CreateSessionParams) (repo.Session, error) {
+func (m *MockRepo) CreateSession(arg0 context.Context, arg1 db.CreateSessionParams) (db.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", arg0, arg1)
-	ret0, _ := ret[0].(repo.Session)
+	ret0, _ := ret[0].(db.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -97,10 +98,10 @@ func (mr *MockRepoMockRecorder) CreateSession(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // CreateTransfer mocks base method.
-func (m *MockRepo) CreateTransfer(arg0 context.Context, arg1 repo.CreateTransferParams) (repo.Transfer, error) {
+func (m *MockRepo) CreateTransfer(arg0 context.Context, arg1 db.CreateTransferParams) (db.Transfer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTransfer", arg0, arg1)
-	ret0, _ := ret[0].(repo.Transfer)
+	ret0, _ := ret[0].(db.Transfer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -112,10 +113,10 @@ func (mr *MockRepoMockRecorder) CreateTransfer(arg0, arg1 interface{}) *gomock.C
 }
 
 // CreateUser mocks base method.
-func (m *MockRepo) CreateUser(arg0 context.Context, arg1 repo.CreateUserParams) (repo.User, error) {
+func (m *MockRepo) CreateUser(arg0 context.Context, arg1 db.CreateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1)
-	ret0, _ := ret[0].(repo.User)
+	ret0, _ := ret[0].(db.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -142,10 +143,10 @@ func (mr *MockRepoMockRecorder) CreateUserTx(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // CreateVerifyEmail mocks base method.
-func (m *MockRepo) CreateVerifyEmail(arg0 context.Context, arg1 repo.CreateVerifyEmailParams) (repo.VerifyEmail, error) {
+func (m *MockRepo) CreateVerifyEmail(arg0 context.Context, arg1 db.CreateVerifyEmailParams) (db.VerifyEmail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateVerifyEmail", arg0, arg1)
-	ret0, _ := ret[0].(repo.VerifyEmail)
+	ret0, _ := ret[0].(db.VerifyEmail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -171,10 +172,10 @@ func (mr *MockRepoMockRecorder) DeleteAccount(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // GetAccount mocks base method.
-func (m *MockRepo) GetAccount(arg0 context.Context, arg1 int64) (repo.Account, error) {
+func (m *MockRepo) GetAccount(arg0 context.Context, arg1 int64) (db.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", arg0, arg1)
-	ret0, _ := ret[0].(repo.Account)
+	ret0, _ := ret[0].(db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -186,10 +187,10 @@ func (mr *MockRepoMockRecorder) GetAccount(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // GetAccountForUpdate mocks base method.
-func (m *MockRepo) GetAccountForUpdate(arg0 context.Context, arg1 int64) (repo.Account, error) {
+func (m *MockRepo) GetAccountForUpdate(arg0 context.Context, arg1 int64) (db.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountForUpdate", arg0, arg1)
-	ret0, _ := ret[0].(repo.Account)
+	ret0, _ := ret[0].(db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -201,10 +202,10 @@ func (mr *MockRepoMockRecorder) GetAccountForUpdate(arg0, arg1 interface{}) *gom
 }
 
 // GetEntry mocks base method.
-func (m *MockRepo) GetEntry(arg0 context.Context, arg1 int64) (repo.Entry, error) {
+func (m *MockRepo) GetEntry(arg0 context.Context, arg1 int64) (db.Entry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEntry", arg0, arg1)
-	ret0, _ := ret[0].(repo.Entry)
+	ret0, _ := ret[0].(db.Entry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -216,10 +217,10 @@ func (mr *MockRepoMockRecorder) GetEntry(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // GetSession mocks base method.
-func (m *MockRepo) GetSession(arg0 context.Context, arg1 uuid.UUID) (repo.Session, error) {
+func (m *MockRepo) GetSession(arg0 context.Context, arg1 uuid.UUID) (db.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSession", arg0, arg1)
-	ret0, _ := ret[0].(repo.Session)
+	ret0, _ := ret[0].(db.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -231,10 +232,10 @@ func (mr *MockRepoMockRecorder) GetSession(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // GetTransfer mocks base method.
-func (m *MockRepo) GetTransfer(arg0 context.Context, arg1 int64) (repo.Transfer, error) {
+func (m *MockRepo) GetTransfer(arg0 context.Context, arg1 int64) (db.Transfer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransfer", arg0, arg1)
-	ret0, _ := ret[0].(repo.Transfer)
+	ret0, _ := ret[0].(db.Transfer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -246,10 +247,10 @@ func (mr *MockRepoMockRecorder) GetTransfer(arg0, arg1 interface{}) *gomock.Call
 }
 
 // GetUser mocks base method.
-func (m *MockRepo) GetUser(arg0 context.Context, arg1 string) (repo.User, error) {
+func (m *MockRepo) GetUser(arg0 context.Context, arg1 string) (db.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", arg0, arg1)
-	ret0, _ := ret[0].(repo.User)
+	ret0, _ := ret[0].(db.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -261,10 +262,10 @@ func (mr *MockRepoMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // ListAccounts mocks base method.
-func (m *MockRepo) ListAccounts(arg0 context.Context, arg1 repo.ListAccountsParams) ([]repo.Account, error) {
+func (m *MockRepo) ListAccounts(arg0 context.Context, arg1 db.ListAccountsParams) ([]db.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAccounts", arg0, arg1)
-	ret0, _ := ret[0].([]repo.Account)
+	ret0, _ := ret[0].([]db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -276,10 +277,10 @@ func (mr *MockRepoMockRecorder) ListAccounts(arg0, arg1 interface{}) *gomock.Cal
 }
 
 // ListEntries mocks base method.
-func (m *MockRepo) ListEntries(arg0 context.Context, arg1 repo.ListEntriesParams) ([]repo.Entry, error) {
+func (m *MockRepo) ListEntries(arg0 context.Context, arg1 db.ListEntriesParams) ([]db.Entry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListEntries", arg0, arg1)
-	ret0, _ := ret[0].([]repo.Entry)
+	ret0, _ := ret[0].([]db.Entry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -291,10 +292,10 @@ func (mr *MockRepoMockRecorder) ListEntries(arg0, arg1 interface{}) *gomock.Call
 }
 
 // ListTransfers mocks base method.
-func (m *MockRepo) ListTransfers(arg0 context.Context, arg1 repo.ListTransfersParams) ([]repo.Transfer, error) {
+func (m *MockRepo) ListTransfers(arg0 context.Context, arg1 db.ListTransfersParams) ([]db.Transfer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListTransfers", arg0, arg1)
-	ret0, _ := ret[0].([]repo.Transfer)
+	ret0, _ := ret[0].([]db.Transfer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -321,10 +322,10 @@ func (mr *MockRepoMockRecorder) TransferTx(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // UpdateAccount mocks base method.
-func (m *MockRepo) UpdateAccount(arg0 context.Context, arg1 repo.UpdateAccountParams) (repo.Account, error) {
+func (m *MockRepo) UpdateAccount(arg0 context.Context, arg1 db.UpdateAccountParams) (db.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", arg0, arg1)
-	ret0, _ := ret[0].(repo.Account)
+	ret0, _ := ret[0].(db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -336,10 +337,10 @@ func (mr *MockRepoMockRecorder) UpdateAccount(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // UpdateUser mocks base method.
-func (m *MockRepo) UpdateUser(arg0 context.Context, arg1 repo.UpdateUserParams) (repo.User, error) {
+func (m *MockRepo) UpdateUser(arg0 context.Context, arg1 db.UpdateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
-	ret0, _ := ret[0].(repo.User)
+	ret0, _ := ret[0].(db.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -351,10 +352,10 @@ func (mr *MockRepoMockRecorder) UpdateUser(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // UpdateVerifyEmail mocks base method.
-func (m *MockRepo) UpdateVerifyEmail(arg0 context.Context, arg1 repo.UpdateVerifyEmailParams) (repo.VerifyEmail, error) {
+func (m *MockRepo) UpdateVerifyEmail(arg0 context.Context, arg1 db.UpdateVerifyEmailParams) (db.VerifyEmail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateVerifyEmail", arg0, arg1)
-	ret0, _ := ret[0].(repo.VerifyEmail)
+	ret0, _ := ret[0].(db.VerifyEmail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

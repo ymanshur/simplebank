@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 )
 
 // Repo defines all functions to execute db queries and transactions
 type Repo interface {
-	Querier
+	db.Querier
 	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
 	CreateUserTx(ctx context.Context, arg CreateUserTxParams) (CreateUserTxResult, error)
 	VerifyEmailTx(ctx context.Context, arg VerifyEmailTxParams) (VerifyEmailTxResult, error)
@@ -17,28 +18,28 @@ type Repo interface {
 
 // repoQuery provides all functions to execute SQL queries and transactions
 type repoQuery struct {
-	db *pgxpool.Pool
+	pool *pgxpool.Pool
 
 	// composition
-	*Queries
+	*db.Queries
 }
 
 // NewRepo creates a new Repo
-func NewRepo(db *pgxpool.Pool) Repo {
+func NewRepo(pool *pgxpool.Pool) Repo {
 	return &repoQuery{
-		db:      db,
-		Queries: New(db),
+		pool:    pool,
+		Queries: db.New(pool),
 	}
 }
 
 // execTx executes a function within a database transaction
-func (r *repoQuery) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := r.db.Begin(ctx)
+func (r *repoQuery) execTx(ctx context.Context, fn func(*db.Queries) error) error {
+	tx, err := r.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 
-	q := New(tx)
+	q := db.New(tx)
 	err = fn(q)
 	if err != nil {
 		if rbErr := tx.Rollback(ctx); rbErr != nil {

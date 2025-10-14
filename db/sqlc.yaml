@@ -5,8 +5,8 @@ sql:
     engine: "postgresql"
     gen:
       go:
-        package: "repo"
-        out: "../internal/repo"
+        package: "db"
+        out: "sqlc"
         sql_package: "pgx/v5"
         overrides:
           - db_type: "timestamptz"

@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/repo"
 	mockrepo "github.com/ymanshur/simplebank/internal/repo/mock"
 	"github.com/ymanshur/simplebank/internal/server/worker"
@@ -25,7 +26,7 @@ import (
 type eqCreateUserTxParamsMatcher struct {
 	arg      repo.CreateUserTxParams
 	password string
-	user     repo.User
+	user     db.User
 }
 
 func (expected eqCreateUserTxParamsMatcher) Matches(x interface{}) bool {
@@ -54,7 +55,7 @@ func (e eqCreateUserTxParamsMatcher) String() string {
 }
 
 // EqCreateUserTxParams returns a matcher that matches on CreateUserTxParams equality.
-func EqCreateUserTxParams(arg repo.CreateUserTxParams, password string, user repo.User) gomock.Matcher {
+func EqCreateUserTxParams(arg repo.CreateUserTxParams, password string, user db.User) gomock.Matcher {
 	return eqCreateUserTxParamsMatcher{arg, password, user}
 }
 
@@ -77,7 +78,7 @@ func TestServer_CreateUser(t *testing.T) {
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo, taskDistributor *mockworker.MockTaskDistributor) {
 				arg := repo.CreateUserTxParams{
-					CreateUserParams: repo.CreateUserParams{
+					CreateUserParams: db.CreateUserParams{
 						Username:       user.Username,
 						FullName:       user.FullName,
 						Email:          user.Email,
@@ -282,7 +283,7 @@ func TestServer_LoginUser(t *testing.T) {
 				mrepo.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(repo.User{}, repo.ErrRecordNotFound)
+					Return(db.User{}, repo.ErrRecordNotFound)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -314,7 +315,7 @@ func TestServer_LoginUser(t *testing.T) {
 				mrepo.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(repo.User{}, sql.ErrConnDone)
+					Return(db.User{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -365,12 +366,12 @@ func TestServer_LoginUser(t *testing.T) {
 }
 
 // randomUser generate random user instance
-func randomUser(t *testing.T) (user repo.User, password string) {
+func randomUser(t *testing.T) (user db.User, password string) {
 	password = util.RandomString(8)
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
-	user = repo.User{
+	user = db.User{
 		Username:       util.RandomOwner(),
 		HashedPassword: hashedPassword,
 		FullName:       util.RandomOwner(),
@@ -380,11 +381,11 @@ func randomUser(t *testing.T) (user repo.User, password string) {
 }
 
 // requireBodyMatchUser user response body match assertions
-func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user repo.User) {
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotUser repo.User
+	var gotUser db.User
 	err = json.Unmarshal(data, &gotUser)
 
 	require.NoError(t, err)
