@@ -48,15 +48,15 @@ migratereset: migratedrop migrateup
 sqlc:
 	sqlc generate -f db/sqlc.yaml
 
-test:
+tests:
 	go test -v -cover -short ./...
 
 server:
 	go run main.go
 
-mock:
+mocks:
 	mockgen -package repomock -destination internal/repo/mock/repo.go github.com/ymanshur/simplebank/internal/repo Repo
-	mockgen -package workermock -destination pkg/worker/mock/distributor.go github.com/ymanshur/simplebank/internal/server/worker TaskDistributor
+	mockgen -package workermock -destination pkg/worker/mock/distributor.go github.com/ymanshur/simplebank/pkg/worker TaskDistributor
 
 dbschema:
 	dbml2sql --postgres -o docs/schema.sql docs/schema.dbml
@@ -80,7 +80,7 @@ proto:
     proto/*.proto
 	statik -src=./docs/swagger -dest=./docs
 
-build: test
+build: tests
 	docker build -t simplebank:latest -f deployment/Dockerfile .
 
 # run with necessary environment variables by override app.env
