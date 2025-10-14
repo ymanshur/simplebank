@@ -10,13 +10,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (server *Server) VerifyEmail(ctx context.Context, req *pb.VerifyEmailRequest) (*pb.VerifyEmailResponse, error) {
-	violations := validateVerifyEmailRequest(req)
+func (server *Server) VerifyUser(ctx context.Context, req *pb.VerifyUserRequest) (*pb.VerifyUserResponse, error) {
+	violations := validateVerifyUserRequest(req)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
 	}
 
-	txResult, err := server.store.VerifyEmailTx(ctx, repo.VerifyEmailTxParams{
+	txResult, err := server.store.VerifyUserTx(ctx, repo.VerifyUserTxParams{
 		EmailId:    req.GetEmailId(),
 		SecretCode: req.GetSecretCode(),
 	})
@@ -24,13 +24,13 @@ func (server *Server) VerifyEmail(ctx context.Context, req *pb.VerifyEmailReques
 		return nil, status.Errorf(codes.Internal, "failed to verify email")
 	}
 
-	rsp := &pb.VerifyEmailResponse{
+	rsp := &pb.VerifyUserResponse{
 		IsVerified: txResult.User.IsEmailVerified,
 	}
 	return rsp, nil
 }
 
-func validateVerifyEmailRequest(req *pb.VerifyEmailRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+func validateVerifyUserRequest(req *pb.VerifyUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := validateEmailId(req.GetEmailId()); err != nil {
 		violations = append(violations, fieldViolation("email_id", err))
 	}

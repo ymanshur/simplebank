@@ -26,7 +26,7 @@ var File_service_simple_bank_proto protoreflect.FileDescriptor
 
 const file_service_simple_bank_proto_rawDesc = "" +
 	"\n" +
-	"\x19service_simple_bank.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a\x15rpc_create_user.proto\x1a\x15rpc_update_user.proto\x1a\x14rpc_login_user.proto\x1a\x16rpc_verify_email.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xd9\x04\n" +
+	"\x19service_simple_bank.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a\x15rpc_create_user.proto\x1a\x15rpc_update_user.proto\x1a\x14rpc_login_user.proto\x1a\x15rpc_verify_user.proto\x1a.protoc-gen-openapiv2/options/annotations.proto2\xd6\x04\n" +
 	"\n" +
 	"SimpleBank\x12\x8a\x01\n" +
 	"\n" +
@@ -34,30 +34,31 @@ const file_service_simple_bank_proto_rawDesc = "" +
 	"\n" +
 	"UpdateUser\x12\x15.pb.UpdateUserRequest\x1a\x16.pb.UpdateUserResponse\"G\x92A*\x12\vUpdate user\x1a\x1bUse this API to update user\x82\xd3\xe4\x93\x02\x14:\x01*2\x0f/v1/update_user\x12\x9f\x01\n" +
 	"\tLoginUser\x12\x14.pb.LoginUserRequest\x1a\x15.pb.LoginUserResponse\"e\x92AI\x12\n" +
-	"Login user\x1a;Use this API to login user and get access and refresh token\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/login_user\x12\x94\x01\n" +
-	"\vVerifyEmail\x12\x16.pb.VerifyEmailRequest\x1a\x17.pb.VerifyEmailResponse\"T\x92A:\x12\vVerify user\x1a+Use this API to verify user's email address\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/verify_userB\x80\x01\x92AZ\x12X\n" +
+	"Login user\x1a;Use this API to login user and get access and refresh token\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/login_user\x12\x91\x01\n" +
+	"\n" +
+	"VerifyUser\x12\x15.pb.VerifyUserRequest\x1a\x16.pb.VerifyUserResponse\"T\x92A:\x12\vVerify user\x1a+Use this API to verify user's email address\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/verify_userB\x80\x01\x92AZ\x12X\n" +
 	"\x0fSimple Bank API\"@\n" +
 	"\rYusuf Manshur\x12\x1bhttps://github.com/ymanshur\x1a\x12ymanshur@gmail.com2\x031.0Z!github.com/ymanshur/simplebank/pbb\x06proto3"
 
 var file_service_simple_bank_proto_goTypes = []any{
-	(*CreateUserRequest)(nil),   // 0: pb.CreateUserRequest
-	(*UpdateUserRequest)(nil),   // 1: pb.UpdateUserRequest
-	(*LoginUserRequest)(nil),    // 2: pb.LoginUserRequest
-	(*VerifyEmailRequest)(nil),  // 3: pb.VerifyEmailRequest
-	(*CreateUserResponse)(nil),  // 4: pb.CreateUserResponse
-	(*UpdateUserResponse)(nil),  // 5: pb.UpdateUserResponse
-	(*LoginUserResponse)(nil),   // 6: pb.LoginUserResponse
-	(*VerifyEmailResponse)(nil), // 7: pb.VerifyEmailResponse
+	(*CreateUserRequest)(nil),  // 0: pb.CreateUserRequest
+	(*UpdateUserRequest)(nil),  // 1: pb.UpdateUserRequest
+	(*LoginUserRequest)(nil),   // 2: pb.LoginUserRequest
+	(*VerifyUserRequest)(nil),  // 3: pb.VerifyUserRequest
+	(*CreateUserResponse)(nil), // 4: pb.CreateUserResponse
+	(*UpdateUserResponse)(nil), // 5: pb.UpdateUserResponse
+	(*LoginUserResponse)(nil),  // 6: pb.LoginUserResponse
+	(*VerifyUserResponse)(nil), // 7: pb.VerifyUserResponse
 }
 var file_service_simple_bank_proto_depIdxs = []int32{
 	0, // 0: pb.SimpleBank.CreateUser:input_type -> pb.CreateUserRequest
 	1, // 1: pb.SimpleBank.UpdateUser:input_type -> pb.UpdateUserRequest
 	2, // 2: pb.SimpleBank.LoginUser:input_type -> pb.LoginUserRequest
-	3, // 3: pb.SimpleBank.VerifyEmail:input_type -> pb.VerifyEmailRequest
+	3, // 3: pb.SimpleBank.VerifyUser:input_type -> pb.VerifyUserRequest
 	4, // 4: pb.SimpleBank.CreateUser:output_type -> pb.CreateUserResponse
 	5, // 5: pb.SimpleBank.UpdateUser:output_type -> pb.UpdateUserResponse
 	6, // 6: pb.SimpleBank.LoginUser:output_type -> pb.LoginUserResponse
-	7, // 7: pb.SimpleBank.VerifyEmail:output_type -> pb.VerifyEmailResponse
+	7, // 7: pb.SimpleBank.VerifyUser:output_type -> pb.VerifyUserResponse
 	4, // [4:8] is the sub-list for method output_type
 	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -73,7 +74,7 @@ func file_service_simple_bank_proto_init() {
 	file_rpc_create_user_proto_init()
 	file_rpc_update_user_proto_init()
 	file_rpc_login_user_proto_init()
-	file_rpc_verify_email_proto_init()
+	file_rpc_verify_user_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

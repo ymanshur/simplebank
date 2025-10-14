@@ -4,11 +4,11 @@ package pb;
 
 option go_package = "github.com/ymanshur/simplebank/pb";
 
-message VerifyEmailRequest {
+message VerifyUserRequest {
   int64 email_id = 1;
   string secret_code = 2;
 }
 
-message VerifyEmailResponse {
+message VerifyUserResponse {
   bool is_verified = 1;
 }

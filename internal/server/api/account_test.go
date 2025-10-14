@@ -104,12 +104,12 @@ func TestServer_GetAccount(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mockrepo.NewMockRepo(ctrl)
+			repo := mockrepo.NewMockRepo(ctrl)
 			// build stubs
-			testCase.buildStubs(store)
+			testCase.buildStubs(repo)
 
 			// start test server and send request
-			server := newTestServer(t, store, nil)
+			server := newTestServer(t, repo, nil)
 
 			recorder := httptest.NewRecorder()
 

@@ -220,17 +220,17 @@ func TestServer_CreateUser(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			storeCtrl := gomock.NewController(t)
 			defer storeCtrl.Finish()
-			store := mockrepo.NewMockRepo(storeCtrl)
+			repo := mockrepo.NewMockRepo(storeCtrl)
 
 			taskCtrl := gomock.NewController(t)
 			defer taskCtrl.Finish()
 			taskDistributor := mockworker.NewMockTaskDistributor(taskCtrl)
 
 			// build stubs
-			testCase.buildStubs(store, taskDistributor)
+			testCase.buildStubs(repo, taskDistributor)
 
 			// start test server and send request
-			server := newTestServer(t, store, taskDistributor)
+			server := newTestServer(t, repo, taskDistributor)
 
 			recorder := httptest.NewRecorder()
 
@@ -347,10 +347,10 @@ func TestServer_LoginUser(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mockrepo.NewMockRepo(ctrl)
-			tc.buildStubs(store)
+			repo := mockrepo.NewMockRepo(ctrl)
+			tc.buildStubs(repo)
 
-			server := newTestServer(t, store, nil)
+			server := newTestServer(t, repo, nil)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON

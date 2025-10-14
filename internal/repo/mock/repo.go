@@ -366,17 +366,17 @@ func (mr *MockRepoMockRecorder) UpdateVerifyEmail(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVerifyEmail", reflect.TypeOf((*MockRepo)(nil).UpdateVerifyEmail), arg0, arg1)
 }
 
-// VerifyEmailTx mocks base method.
-func (m *MockRepo) VerifyEmailTx(arg0 context.Context, arg1 repo.VerifyEmailTxParams) (repo.VerifyEmailTxResult, error) {
+// VerifyUserTx mocks base method.
+func (m *MockRepo) VerifyUserTx(arg0 context.Context, arg1 repo.VerifyUserTxParams) (repo.VerifyUserTxResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyEmailTx", arg0, arg1)
-	ret0, _ := ret[0].(repo.VerifyEmailTxResult)
+	ret := m.ctrl.Call(m, "VerifyUserTx", arg0, arg1)
+	ret0, _ := ret[0].(repo.VerifyUserTxResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// VerifyEmailTx indicates an expected call of VerifyEmailTx.
-func (mr *MockRepoMockRecorder) VerifyEmailTx(arg0, arg1 interface{}) *gomock.Call {
+// VerifyUserTx indicates an expected call of VerifyUserTx.
+func (mr *MockRepoMockRecorder) VerifyUserTx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmailTx", reflect.TypeOf((*MockRepo)(nil).VerifyEmailTx), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyUserTx", reflect.TypeOf((*MockRepo)(nil).VerifyUserTx), arg0, arg1)
 }

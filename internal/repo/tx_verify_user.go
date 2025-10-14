@@ -7,18 +7,18 @@ import (
 	db "github.com/ymanshur/simplebank/db/sqlc"
 )
 
-type VerifyEmailTxParams struct {
+type VerifyUserTxParams struct {
 	EmailId    int64
 	SecretCode string
 }
 
-type VerifyEmailTxResult struct {
+type VerifyUserTxResult struct {
 	User        db.User
 	VerifyEmail db.VerifyEmail
 }
 
-func (r *repoQuery) VerifyEmailTx(ctx context.Context, arg VerifyEmailTxParams) (VerifyEmailTxResult, error) {
-	var result VerifyEmailTxResult
+func (r *repoQuery) VerifyUserTx(ctx context.Context, arg VerifyUserTxParams) (VerifyUserTxResult, error) {
+	var result VerifyUserTxResult
 
 	err := r.execTx(ctx, func(q *db.Queries) error {
 		var err error

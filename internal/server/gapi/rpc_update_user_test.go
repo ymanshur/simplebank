@@ -175,12 +175,12 @@ func TestRPC_UpdateUser(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			storeCtrl := gomock.NewController(t)
 			defer storeCtrl.Finish()
-			store := mockrepo.NewMockRepo(storeCtrl)
+			repo := mockrepo.NewMockRepo(storeCtrl)
 
-			tc.buildStubs(store)
+			tc.buildStubs(repo)
 
 			// start test server and pass the request
-			server := newTestServer(t, store, nil)
+			server := newTestServer(t, repo, nil)
 			ctx := tc.buildContext(t, server.tokenMaker)
 			res, err := server.UpdateUser(ctx, tc.req)
 

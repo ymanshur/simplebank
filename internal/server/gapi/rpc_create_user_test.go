@@ -137,16 +137,16 @@ func TestRPC_CreateUser(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			storeCtrl := gomock.NewController(t)
 			defer storeCtrl.Finish()
-			store := mockrepo.NewMockRepo(storeCtrl)
+			repo := mockrepo.NewMockRepo(storeCtrl)
 
 			taskCtrl := gomock.NewController(t)
 			defer taskCtrl.Finish()
 			taskDistributor := mockworker.NewMockTaskDistributor(taskCtrl)
 
-			tc.buildStubs(store, taskDistributor)
+			tc.buildStubs(repo, taskDistributor)
 
 			// start test server and pass the request
-			server := newTestServer(t, store, taskDistributor)
+			server := newTestServer(t, repo, taskDistributor)
 			res, err := server.CreateUser(context.Background(), tc.req)
 
 			// check response

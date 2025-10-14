@@ -127,12 +127,12 @@
       "get": {
         "summary": "Verify user",
         "description": "Use this API to verify user's email address",
-        "operationId": "SimpleBank_VerifyEmail",
+        "operationId": "SimpleBank_VerifyUser",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbVerifyEmailResponse"
+              "$ref": "#/definitions/pbVerifyUserResponse"
             }
           },
           "default": {
@@ -272,7 +272,7 @@
         }
       }
     },
-    "pbVerifyEmailResponse": {
+    "pbVerifyUserResponse": {
       "type": "object",
       "properties": {
         "is_verified": {
