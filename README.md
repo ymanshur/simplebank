@@ -254,7 +254,7 @@ make run
 
 ### Database
 
-Update your database design in [docs/db.dbml](docs/db.dbml), build the DB documentation:
+Update your database design in [docs/schema.dbml](docs/schema.dbml), build the DB documentation:
 
 ```bash
 make dbdocs

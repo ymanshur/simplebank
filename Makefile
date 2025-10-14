@@ -59,10 +59,10 @@ mock:
 	mockgen -package workermock -destination pkg/worker/mock/distributor.go github.com/ymanshur/simplebank/pkg/worker TaskDistributor
 
 dbschema:
-	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
+	dbml2sql --postgres -o docs/schema.sql docs/schema.dbml
 
 dbdocs:
-	dbdocs build docs/db.dbml
+	dbdocs build docs/schema.dbml
 
 .PHONY: proto
 proto:
