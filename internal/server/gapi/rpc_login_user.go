@@ -9,12 +9,12 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
-	mtdt := server.extractMetadata(ctx)
+func (s *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
+	mtdt := s.extractMetadata(ctx)
 
 	fmt.Println(mtdt)
 
-	login, err := server.ucase.User.Login(ctx, ucase.LoginUserRequest{
+	login, err := s.ucase.User.Login(ctx, ucase.LoginUserRequest{
 		Username:  req.GetUsername(),
 		Password:  req.Password,
 		UserAgent: mtdt.UserAgent,

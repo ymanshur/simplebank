@@ -43,7 +43,7 @@ type RenewAccessTokenResponse struct {
 }
 
 func (u *tokenUcase) RenewAccessToken(ctx context.Context, req RenewAccessTokenRequest) (*RenewAccessTokenResponse, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 

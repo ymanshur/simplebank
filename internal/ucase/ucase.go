@@ -14,7 +14,6 @@ type UseCase struct {
 	Token       TokenUseCase
 	Account     AccountUseCase
 	Transaction TransactionUseCase
-	VerifyEmail VerifyEmailUseCase
 }
 
 func NewUseCase(
@@ -35,6 +34,7 @@ type UserUseCase interface {
 	Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error)
 	Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error)
 	Login(ctx context.Context, req LoginUserRequest) (*LoginUserResponse, error)
+	Verify(ctx context.Context, req VerifyUserRequest) (*VerifyUserResponse, error)
 }
 
 type TokenUseCase interface {

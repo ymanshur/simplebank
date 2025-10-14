@@ -7,13 +7,13 @@ import (
 	pb "github.com/ymanshur/simplebank/proto"
 )
 
-func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
-	authPayload, err := server.authorizeUser(ctx)
+func (s *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	authPayload, err := s.authorizeUser(ctx)
 	if err != nil {
 		return nil, unauthenticatedError(err)
 	}
 
-	user, err := server.ucase.User.Update(ctx, ucase.UpdateUserRequest{
+	user, err := s.ucase.User.Update(ctx, ucase.UpdateUserRequest{
 		Auth: ucase.AuthRequest{
 			Username: authPayload.Username,
 			Role:     authPayload.Role,

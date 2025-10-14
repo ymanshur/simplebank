@@ -74,7 +74,7 @@ type UserResponse struct {
 }
 
 func (u *userUcase) Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +139,7 @@ type LoginUserResponse struct {
 }
 
 func (u *userUcase) Login(ctx context.Context, req LoginUserRequest) (*LoginUserResponse, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 
@@ -226,7 +226,7 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 		return nil, ErrPermisionDenied
 	}
 
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 
@@ -276,6 +276,41 @@ func (u *userUcase) Update(ctx context.Context, req UpdateUserRequest) (*UserRes
 	}
 
 	rsp := convertUser(user)
+	return &rsp, nil
+}
+
+type VerifyUserRequest struct {
+	EmailID    int64  `json:"email_id"`
+	SecretCode string `json:"secret_code"`
+}
+
+func (r VerifyUserRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.EmailID, validation.Required, validator.ValidID()),
+		validation.Field(&r.SecretCode, validation.Required, validation.By(validator.ValidSecretCode)),
+	)
+}
+
+type VerifyUserResponse struct {
+	IsVerified bool
+}
+
+func (u *userUcase) Verify(ctx context.Context, req VerifyUserRequest) (*VerifyUserResponse, error) {
+	if err := validation.Validate(req); err != nil {
+		return nil, err
+	}
+
+	txResult, err := u.repo.VerifyUserTx(ctx, repo.VerifyUserTxParams{
+		EmailId:    req.EmailID,
+		SecretCode: req.SecretCode,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "verify user")
+	}
+
+	rsp := VerifyUserResponse{
+		IsVerified: txResult.User.IsEmailVerified,
+	}
 	return &rsp, nil
 }
 

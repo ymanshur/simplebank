@@ -57,7 +57,7 @@ type AccountResponse struct {
 }
 
 func (u *accountUcase) Create(ctx context.Context, req CreateAccountRequest) (*AccountResponse, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 
@@ -106,7 +106,7 @@ func (r GetAccountRequest) Validate() error {
 }
 
 func (u *accountUcase) Get(ctx context.Context, req GetAccountRequest) (*AccountResponse, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 
@@ -162,7 +162,7 @@ func (r ListAccountRequest) Validate() error {
 }
 
 func (u *accountUcase) List(ctx context.Context, req ListAccountRequest) ([]AccountResponse, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 

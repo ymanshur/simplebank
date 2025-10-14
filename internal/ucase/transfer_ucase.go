@@ -66,7 +66,7 @@ type TransferResult struct {
 }
 
 func (u *transactionUcase) Transfer(ctx context.Context, req TransferRequest) (*TransferResult, error) {
-	if err := validation.Validate(&req); err != nil {
+	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
 

@@ -7,8 +7,8 @@ import (
 	pb "github.com/ymanshur/simplebank/proto"
 )
 
-func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	user, err := server.ucase.User.Create(ctx, ucase.CreateUserRequest{
+func (s *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	user, err := s.ucase.User.Create(ctx, ucase.CreateUserRequest{
 		Username: req.GetUsername(),
 		FullName: req.GetFullName(),
 		Email:    req.GetEmail(),

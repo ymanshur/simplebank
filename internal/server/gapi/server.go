@@ -30,10 +30,12 @@ type Server struct {
 	config          config.Config
 	store           repo.Repo
 	tokenMaker      token.Maker
-	rpc             *grpc.Server
-	gateway         *http.Server
 	taskDistributor worker.TaskDistributor
-	ucase           ucase.UseCase
+
+	rpcServer     *grpc.Server
+	gatewayServer *http.Server
+
+	ucase ucase.UseCase
 }
 
 // NewServer creates a new gRPC server.
@@ -61,20 +63,20 @@ func NewServer(config config.Config, repo repo.Repo, taskDistributor worker.Task
 	}
 	grpcRecovery := recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))
 
-	server.rpc = grpc.NewServer(grpc.ChainUnaryInterceptor(
+	server.rpcServer = grpc.NewServer(grpc.ChainUnaryInterceptor(
 		GrpcLogger,
 		grpcRecovery,
 	))
-	pb.RegisterSimpleBankServer(server.rpc, server)
+	pb.RegisterSimpleBankServer(server.rpcServer, server)
 
 	// Allows the gRPC client to explore available RPCs on the server
 	// as some kind of self server documentation.
-	reflection.Register(server.rpc)
+	reflection.Register(server.rpcServer)
 
 	return server, nil
 }
 
-func (server *Server) Start(address string) error {
+func (s *Server) Start(address string) error {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create listener")
@@ -82,38 +84,38 @@ func (server *Server) Start(address string) error {
 
 	log.Info().Msgf("start gRPC server at %s", listener.Addr().String())
 
-	return server.rpc.Serve(listener)
+	return s.rpcServer.Serve(listener)
 }
 
-func (server *Server) Shutdown() {
+func (s *Server) Shutdown() {
 	log.Info().Msg("graceful shutdown gRPC server")
 
-	server.rpc.GracefulStop()
+	s.rpcServer.GracefulStop()
 
 	log.Info().Msg("gRPC server is stopped")
 }
 
-func (server *Server) StartGateway(address string, allowedOrigins []string, mux *http.ServeMux) error {
+func (s *Server) StartGateway(address string, allowedOrigins []string, mux *http.ServeMux) error {
 	handler := HttpLogger(HttpRecovery(mux))
 	handlerWithCORS := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedHeaders: []string{"*"},
 	}).Handler(handler)
 
-	server.gateway = &http.Server{
+	s.gatewayServer = &http.Server{
 		Addr:    address,
 		Handler: handlerWithCORS,
 	}
 
-	log.Info().Msgf("start HTTP gateway server at %s", server.gateway.Addr)
+	log.Info().Msgf("start HTTP gateway server at %s", s.gatewayServer.Addr)
 
-	return server.gateway.ListenAndServe()
+	return s.gatewayServer.ListenAndServe()
 }
 
-func (server *Server) ShutdownGateway() error {
+func (s *Server) ShutdownGateway() error {
 	log.Info().Msg("graceful shutdown HTTP gateway server")
 
-	err := server.gateway.Shutdown(context.Background())
+	err := s.gatewayServer.Shutdown(context.Background())
 	if err != nil {
 		return err
 	}
