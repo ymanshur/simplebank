@@ -2,7 +2,6 @@ package gapi
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ymanshur/simplebank/internal/ucase"
 	pb "github.com/ymanshur/simplebank/proto"
@@ -11,8 +10,6 @@ import (
 
 func (s *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
 	mtdt := s.extractMetadata(ctx)
-
-	fmt.Println(mtdt)
 
 	login, err := s.ucase.User.Login(ctx, ucase.LoginUserRequest{
 		Username:  req.GetUsername(),

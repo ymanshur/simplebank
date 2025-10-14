@@ -24,16 +24,16 @@ func (s *Server) extractMetadata(ctx context.Context) *Metadata {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		// log.Printf("metadata: %+v\n", md)
 
-		if userAgents := md.Get(grpcGatewayUserAgentHeader); len(userAgents) > 0 {
-			mtdt.UserAgent = userAgents[0]
+		if values := md.Get(grpcGatewayUserAgentHeader); len(values) > 0 {
+			mtdt.UserAgent = values[0]
 		}
 
-		if userAgents := md.Get(userAgentHeader); len(userAgents) > 0 {
-			mtdt.UserAgent = userAgents[0]
+		if values := md.Get(userAgentHeader); len(values) > 0 {
+			mtdt.UserAgent = values[0]
 		}
 
-		if clientIPs := md.Get(xForwardedForHeader); len(clientIPs) > 0 {
-			mtdt.ClientIP = clientIPs[0]
+		if values := md.Get(xForwardedForHeader); len(values) > 0 {
+			mtdt.ClientIP = values[0]
 		}
 	}
 

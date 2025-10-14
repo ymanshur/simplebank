@@ -13,11 +13,15 @@ import (
 	"github.com/ymanshur/simplebank/pkg/util"
 )
 
+type VerifyEmailUcase interface {
+	Create(ctx context.Context, req CreateVerifyEmailRequest) (*CreateVerifyEmailResponse, error)
+}
+
 type verifyEmailUcase struct {
 	repo repo.Repo
 }
 
-func NewVerifyEmailUseCase(repo repo.Repo) VerifyEmailUseCase {
+func NewVerifyEmailUseCase(repo repo.Repo) VerifyEmailUcase {
 	return &verifyEmailUcase{repo: repo}
 }
 

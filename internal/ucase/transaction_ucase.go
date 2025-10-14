@@ -14,11 +14,15 @@ import (
 	"github.com/ymanshur/simplebank/internal/validator"
 )
 
+type TransactionUcase interface {
+	Transfer(ctx context.Context, req TransferRequest) (*TransferResult, error)
+}
+
 type transactionUcase struct {
 	repo repo.Repo
 }
 
-func NewTransactionUseCase(repo repo.Repo) TransactionUseCase {
+func NewTransactionUcase(repo repo.Repo) TransactionUcase {
 	return &transactionUcase{
 		repo: repo,
 	}

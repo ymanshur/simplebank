@@ -14,11 +14,17 @@ import (
 	"github.com/ymanshur/simplebank/internal/validator"
 )
 
+type AccountUcase interface {
+	Create(ctx context.Context, req CreateAccountRequest) (*AccountResponse, error)
+	Get(ctx context.Context, req GetAccountRequest) (*AccountResponse, error)
+	List(ctx context.Context, req ListAccountRequest) ([]AccountResponse, error)
+}
+
 type accountUcase struct {
 	repo repo.Repo
 }
 
-func NewAccountUseCase(repo repo.Repo) AccountUseCase {
+func NewAccountUcase(repo repo.Repo) AccountUcase {
 	return &accountUcase{
 		repo: repo,
 	}

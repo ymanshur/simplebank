@@ -28,6 +28,13 @@ var (
 	ErrPermisionDenied     = typex.ErrForbidden("permission denied")
 )
 
+type UserUcase interface {
+	Create(ctx context.Context, req CreateUserRequest) (*UserResponse, error)
+	Update(ctx context.Context, req UpdateUserRequest) (*UserResponse, error)
+	Login(ctx context.Context, req LoginUserRequest) (*LoginUserResponse, error)
+	Verify(ctx context.Context, req VerifyUserRequest) (*VerifyUserResponse, error)
+}
+
 type userUcase struct {
 	config          config.Config
 	repo            repo.Repo
@@ -35,12 +42,12 @@ type userUcase struct {
 	taskDistributor worker.TaskDistributor
 }
 
-func NewUserUseCase(
+func NewUserUcase(
 	config config.Config,
 	repo repo.Repo,
 	tokenMaker token.Maker,
 	taskDistributor worker.TaskDistributor,
-) UserUseCase {
+) UserUcase {
 	return &userUcase{
 		config:          config,
 		repo:            repo,

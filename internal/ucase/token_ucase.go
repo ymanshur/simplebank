@@ -13,13 +13,17 @@ import (
 	"github.com/ymanshur/simplebank/pkg/token"
 )
 
+type TokenUcase interface {
+	Renew(ctx context.Context, req RenewRequest) (*RenewResponse, error)
+}
+
 type tokenUcase struct {
 	config     config.Config
 	repo       db.Repo
 	tokenMaker token.Maker
 }
 
-func NewTokenUseCase(config config.Config, repo db.Repo, tokenMaker token.Maker) TokenUseCase {
+func NewTokenUcase(config config.Config, repo db.Repo, tokenMaker token.Maker) TokenUcase {
 	return &tokenUcase{
 		config:     config,
 		repo:       repo,
@@ -27,22 +31,22 @@ func NewTokenUseCase(config config.Config, repo db.Repo, tokenMaker token.Maker)
 	}
 }
 
-type RenewAccessTokenRequest struct {
+type RenewRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func (r RenewAccessTokenRequest) Validate() error {
+func (r RenewRequest) Validate() error {
 	return validation.ValidateStruct(&r,
 		validation.Field(&r.RefreshToken, validation.Required),
 	)
 }
 
-type RenewAccessTokenResponse struct {
+type RenewResponse struct {
 	Token     string
 	ExpiresAt time.Time
 }
 
-func (u *tokenUcase) RenewAccessToken(ctx context.Context, req RenewAccessTokenRequest) (*RenewAccessTokenResponse, error) {
+func (u *tokenUcase) Renew(ctx context.Context, req RenewRequest) (*RenewResponse, error) {
 	if err := validation.Validate(req); err != nil {
 		return nil, err
 	}
@@ -87,7 +91,7 @@ func (u *tokenUcase) RenewAccessToken(ctx context.Context, req RenewAccessTokenR
 		return nil, errors.Wrap(err, "create token")
 	}
 
-	rsp := RenewAccessTokenResponse{
+	rsp := RenewResponse{
 		Token:     accessToken,
 		ExpiresAt: accessPayload.ExpiredAt,
 	}

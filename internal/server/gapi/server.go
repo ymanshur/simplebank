@@ -35,7 +35,7 @@ type Server struct {
 	rpcServer     *grpc.Server
 	gatewayServer *http.Server
 
-	ucase ucase.UseCase
+	ucase ucase.Ucase
 }
 
 // NewServer creates a new gRPC server.
@@ -50,7 +50,7 @@ func NewServer(config config.Config, repo repo.Repo, taskDistributor worker.Task
 		store:           repo,
 		tokenMaker:      tokenMaker,
 		taskDistributor: taskDistributor,
-		ucase:           ucase.NewUseCase(config, repo, tokenMaker, taskDistributor),
+		ucase:           ucase.NewUcase(config, repo, tokenMaker, taskDistributor),
 	}
 
 	grpcPanicRecoveryHandler := func(p any) (err error) {

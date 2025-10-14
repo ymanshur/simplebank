@@ -3,7 +3,7 @@ package gapi
 import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/ymanshur/simplebank/internal/ucase"
-	"github.com/ymanshur/simplebank/proto"
+	pb "github.com/ymanshur/simplebank/proto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -15,6 +15,13 @@ func convertUser(user *ucase.UserResponse) *pb.User {
 		Email:             user.Email,
 		PasswordChangedAt: timestamppb.New(user.PasswordChangedAt),
 		CreatedAt:         timestamppb.New(user.CreatedAt),
+	}
+}
+
+func fieldViolation(field string, err error) *errdetails.BadRequest_FieldViolation {
+	return &errdetails.BadRequest_FieldViolation{
+		Field:       field,
+		Description: err.Error(),
 	}
 }
 
