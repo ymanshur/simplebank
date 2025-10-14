@@ -6,23 +6,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/config"
-	db "github.com/ymanshur/simplebank/internal/repo"
+	"github.com/ymanshur/simplebank/internal/repo"
 	"github.com/ymanshur/simplebank/pkg/util"
 	"github.com/ymanshur/simplebank/pkg/worker"
 )
 
-func newTestServer(t *testing.T, store db.Repo, taskDistributor worker.TaskDistributor) *Server {
+func newTestServer(repo repo.Repo, taskDistributor worker.TaskDistributor) (*Server, error) {
 	config := config.Config{
 		TokenSymmetricKey:   util.RandomString(32),
 		AccessTokenDuration: time.Minute,
 	}
 
-	server, err := NewServer(config, store, taskDistributor)
-	require.NoError(t, err)
-
-	return server
+	return NewServer(config, repo, taskDistributor)
 }
 
 func TestMain(m *testing.M) {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/ymanshur/simplebank/internal/common"
 	"github.com/ymanshur/simplebank/internal/repo"
@@ -48,7 +49,8 @@ func TestServer_Transfer(t *testing.T) {
 				"currency":        common.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user1.Username, user1.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user1.Username, user1.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
@@ -74,7 +76,8 @@ func TestServer_Transfer(t *testing.T) {
 				"currency":        common.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user2.Username, user2.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user2.Username, user2.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(1).Return(account1, nil)
@@ -94,7 +97,8 @@ func TestServer_Transfer(t *testing.T) {
 				"currency":        common.USD,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user3.Username, user3.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user3.Username, user3.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account3.ID)).Times(1).Return(account3, nil)
@@ -117,7 +121,8 @@ func TestServer_Transfer(t *testing.T) {
 			testCase.buildStubs(repo)
 
 			// start test server and send request
-			server := newTestServer(t, repo, nil)
+			server, err := newTestServer(repo, nil)
+			assert.NoError(t, err)
 
 			recorder := httptest.NewRecorder()
 
@@ -125,7 +130,7 @@ func TestServer_Transfer(t *testing.T) {
 			data, err := json.Marshal(testCase.body)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/v1/transfers", bytes.NewReader(data))
+			request := httptest.NewRequest(http.MethodPost, "/api/transfers", bytes.NewReader(data))
 
 			testCase.setupAuth(t, request, server.tokenMaker)
 

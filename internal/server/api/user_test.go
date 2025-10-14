@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/repo"
@@ -230,7 +231,8 @@ func TestServer_CreateUser(t *testing.T) {
 			testCase.buildStubs(repo, taskDistributor)
 
 			// start test server and send request
-			server := newTestServer(t, repo, taskDistributor)
+			server, err := newTestServer(repo, taskDistributor)
+			assert.NoError(t, err)
 
 			recorder := httptest.NewRecorder()
 
@@ -238,7 +240,7 @@ func TestServer_CreateUser(t *testing.T) {
 			data, err := json.Marshal(testCase.body)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/v1/create_user", bytes.NewReader(data))
+			request := httptest.NewRequest(http.MethodPost, "/api/create_user", bytes.NewReader(data))
 			server.router.ServeHTTP(recorder, request)
 
 			// check response
@@ -350,14 +352,15 @@ func TestServer_LoginUser(t *testing.T) {
 			repo := mockrepo.NewMockRepo(ctrl)
 			tc.buildStubs(repo)
 
-			server := newTestServer(t, repo, nil)
+			server, err := newTestServer(repo, nil)
+			assert.NoError(t, err)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/v1/login_user"
+			url := "/api/login_user"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
 

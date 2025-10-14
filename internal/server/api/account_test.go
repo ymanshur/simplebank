@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	db "github.com/ymanshur/simplebank/db/sqlc"
 	"github.com/ymanshur/simplebank/internal/common"
@@ -37,7 +38,8 @@ func TestServer_GetAccount(t *testing.T) {
 			name:      "OK", // happy case
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().
@@ -54,7 +56,8 @@ func TestServer_GetAccount(t *testing.T) {
 			name:      "Not Found",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().
@@ -70,7 +73,8 @@ func TestServer_GetAccount(t *testing.T) {
 			name:      "Internal Error",
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().
@@ -86,7 +90,8 @@ func TestServer_GetAccount(t *testing.T) {
 			name:      "Invalid ID",
 			accountID: 0,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				err := addAuthorization(request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
+				assert.NoError(t, err)
 			},
 			buildStubs: func(mrepo *mockrepo.MockRepo) {
 				mrepo.EXPECT().
@@ -109,11 +114,12 @@ func TestServer_GetAccount(t *testing.T) {
 			testCase.buildStubs(repo)
 
 			// start test server and send request
-			server := newTestServer(t, repo, nil)
+			server, err := newTestServer(repo, nil)
+			assert.NoError(t, err)
 
 			recorder := httptest.NewRecorder()
 
-			requestTarget := fmt.Sprintf("/v1/accounts/%d", testCase.accountID)
+			requestTarget := fmt.Sprintf("/api/accounts/%d", testCase.accountID)
 			request := httptest.NewRequest(http.MethodGet, requestTarget, nil)
 
 			testCase.setupAuth(t, request, server.tokenMaker)

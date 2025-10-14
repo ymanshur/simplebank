@@ -6,12 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/ymanshur/simplebank/config"
 	"github.com/ymanshur/simplebank/internal/repo"
-	"github.com/ymanshur/simplebank/internal/typex"
 	"github.com/ymanshur/simplebank/internal/ucase"
 	"github.com/ymanshur/simplebank/pkg/token"
 	"github.com/ymanshur/simplebank/pkg/worker"
@@ -19,11 +16,15 @@ import (
 
 // Server serves HTTP requests for our banking service.
 type Server struct {
-	http       *http.Server
+	config          config.Config
+	repo            repo.Repo
+	tokenMaker      token.Maker
+	taskDistributor worker.TaskDistributor
+
+	httpServer *http.Server
 	router     *gin.Engine
-	config     config.Config
-	tokenMaker token.Maker
-	ucase      ucase.UseCase
+
+	ucase ucase.Ucase
 }
 
 // NewServer creates a new HTTP server and set up routing.
@@ -34,54 +35,56 @@ func NewServer(config config.Config, repo repo.Repo, taskDistributor worker.Task
 	}
 
 	server := &Server{
-		config:     config,
-		tokenMaker: tokenMaker,
-		ucase:      ucase.NewUseCase(config, repo, tokenMaker, taskDistributor),
+		config:          config,
+		repo:            repo,
+		tokenMaker:      tokenMaker,
+		taskDistributor: taskDistributor,
+		ucase:           ucase.NewUcase(config, repo, tokenMaker, taskDistributor),
 	}
 
 	server.setupRouter()
 	return server, nil
 }
 
-func (server *Server) setupRouter() {
-	if !server.config.Debug {
+func (s *Server) setupRouter() {
+	if !s.config.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router := gin.Default()
 
 	v1Routes := router.Group("/v1")
-	v1Routes.POST("/create_user", server.createUser)
-	v1Routes.POST("/login_user", server.loginUser)
-	v1Routes.POST("/renew_access_token", server.renewAccessToken)
+	v1Routes.POST("/create_user", s.CreateUser)
+	v1Routes.POST("/login_user", s.LoginUser)
+	v1Routes.POST("/renew_access_token", s.RenewAccessToken)
 
-	v1AuthRoutes := v1Routes.Group("/").Use(authMiddleware(server.tokenMaker))
+	v1AuthRoutes := v1Routes.Group("/").Use(AuthMiddleware(s.tokenMaker))
 
-	v1AuthRoutes.POST("/accounts", server.createAccount)
-	v1AuthRoutes.GET("/accounts/:id", server.getAccount)
-	v1AuthRoutes.GET("/accounts", server.listAccounts)
+	v1AuthRoutes.POST("/accounts", s.CreateAccount)
+	v1AuthRoutes.GET("/accounts/:id", s.GetAccount)
+	v1AuthRoutes.GET("/accounts", s.ListAccounts)
 
-	v1AuthRoutes.POST("/transfers", server.createTransfer)
+	v1AuthRoutes.POST("/transfer", s.CreateTransfer)
 
-	server.router = router
+	s.router = router
 }
 
 // Start runs the HTTP server on a specific address.
-func (server *Server) Start(address string) error {
-	server.http = &http.Server{
+func (s *Server) Start(address string) error {
+	s.httpServer = &http.Server{
 		Addr:    address,
-		Handler: server.router.Handler(),
+		Handler: s.router.Handler(),
 	}
 
-	log.Info().Msgf("start HTTP server at %s", server.http.Addr)
+	log.Info().Msgf("start HTTP server at %s", s.httpServer.Addr)
 
-	return server.http.ListenAndServe()
+	return s.httpServer.ListenAndServe()
 }
 
-func (server *Server) Shutdown() error {
+func (s *Server) Shutdown() error {
 	log.Info().Msg("graceful shutdown HTTP server")
 
-	err := server.http.Shutdown(context.Background())
+	err := s.httpServer.Shutdown(context.Background())
 	if err != nil {
 		return err
 	}
@@ -89,27 +92,4 @@ func (server *Server) Shutdown() error {
 	log.Info().Msg("HTTP server is stopped")
 
 	return nil
-}
-
-func responseError(err error) gin.H {
-	return gin.H{"error": err.Error()}
-}
-
-func translationError(err error) (int, error) {
-	errCause := errors.Cause(err)
-	switch errCause {
-	}
-
-	switch errCause := errCause.(type) {
-	case validation.Errors, typex.ErrUnProcessableEnity:
-		return http.StatusUnprocessableEntity, errCause
-	case typex.ErrDataNotFound:
-		return http.StatusNotFound, errCause
-	case typex.ErrUnAuthorized:
-		return http.StatusUnauthorized, errCause
-	case typex.ErrForbidden:
-		return http.StatusForbidden, errCause
-	default:
-		return http.StatusInternalServerError, errCause
-	}
 }

@@ -10,11 +10,11 @@ import (
 	"github.com/ymanshur/simplebank/pkg/token"
 )
 
-type createAccountRequest struct {
+type CreateAccountRequest struct {
 	Currency string `json:"currency"`
 }
 
-type accountResponse struct {
+type AccountResponse struct {
 	ID        int64     `json:"id"`
 	Owner     string    `json:"owner"`
 	Balance   int64     `json:"balance"`
@@ -22,8 +22,8 @@ type accountResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (server *Server) createAccount(ctx *gin.Context) {
-	var req createAccountRequest
+func (s *Server) CreateAccount(ctx *gin.Context) {
+	var req CreateAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
@@ -31,7 +31,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	account, err := server.ucase.Account.Create(ctx, ucase.CreateAccountRequest{
+	account, err := s.ucase.Account.Create(ctx, ucase.CreateAccountRequest{
 		Auth: ucase.AuthRequest{
 			Username: authPayload.Username,
 		},
@@ -47,12 +47,12 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-type getAccountRequest struct {
+type GetAccountRequest struct {
 	ID int64 `uri:"id"`
 }
 
-func (server *Server) getAccount(ctx *gin.Context) {
-	var req getAccountRequest
+func (s *Server) GetAccount(ctx *gin.Context) {
+	var req GetAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
@@ -60,7 +60,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	account, err := server.ucase.Account.Get(ctx, ucase.GetAccountRequest{
+	account, err := s.ucase.Account.Get(ctx, ucase.GetAccountRequest{
 		ID: req.ID,
 		Auth: ucase.AuthRequest{
 			Username: authPayload.Username,
@@ -76,13 +76,13 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-type listAccountRequest struct {
+type ListAccountRequest struct {
 	PageID   int32 `form:"page_id"`
 	PageSize int32 `form:"page_size"`
 }
 
-func (server *Server) listAccounts(ctx *gin.Context) {
-	var req listAccountRequest
+func (s *Server) ListAccounts(ctx *gin.Context) {
+	var req ListAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
@@ -90,7 +90,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	accounts, err := server.ucase.Account.List(ctx, ucase.ListAccountRequest{
+	accounts, err := s.ucase.Account.List(ctx, ucase.ListAccountRequest{
 		Auth: ucase.AuthRequest{
 			Username: authPayload.Username,
 		},
@@ -107,22 +107,4 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 
 	rsp := convertAccounts(accounts)
 	ctx.JSON(http.StatusOK, rsp)
-}
-
-func convertAccount(account *ucase.AccountResponse) accountResponse {
-	return accountResponse{
-		ID:        account.ID,
-		Owner:     account.Owner,
-		Balance:   account.Balance,
-		Currency:  account.Currency,
-		CreatedAt: account.CreatedAt,
-	}
-}
-
-func convertAccounts(accounts []ucase.AccountResponse) []accountResponse {
-	var res []accountResponse
-	for _, account := range accounts {
-		res = append(res, convertAccount(&account))
-	}
-	return res
 }

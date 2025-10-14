@@ -11,14 +11,14 @@ import (
 	"github.com/ymanshur/simplebank/internal/ucase"
 )
 
-type createUserRequest struct {
+type CreateUserRequest struct {
 	Username string `json:"username"`
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type userResponse struct {
+type UserResponse struct {
 	Username          string    `json:"username"`
 	FullName          string    `json:"full_name"`
 	Email             string    `json:"email"`
@@ -26,14 +26,14 @@ type userResponse struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
-func (server *Server) createUser(ctx *gin.Context) {
-	var req createUserRequest
+func (s *Server) CreateUser(ctx *gin.Context) {
+	var req CreateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
-	user, err := server.ucase.User.Create(ctx, ucase.CreateUserRequest{
+	user, err := s.ucase.User.Create(ctx, ucase.CreateUserRequest{
 		Username: req.Username,
 		FullName: req.FullName,
 		Email:    req.Email,
@@ -59,28 +59,28 @@ func (server *Server) createUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-type loginUserRequest struct {
+type LoginUserRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type loginUserResponse struct {
+type LoginUserResponse struct {
 	SessionID             uuid.UUID    `json:"session_id"`
 	AccessToken           string       `json:"access_token"`
 	AccessTokenExpiresAt  time.Time    `json:"access_token_expires_at"`
 	RefreshToken          string       `json:"refresh_token"`
 	RefreshTokenExpiresAt time.Time    `json:"refresh_token_expires_at"`
-	User                  userResponse `json:"user"`
+	User                  UserResponse `json:"user"`
 }
 
-func (server *Server) loginUser(ctx *gin.Context) {
-	var req loginUserRequest
+func (s *Server) LoginUser(ctx *gin.Context) {
+	var req LoginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, responseError(err))
 		return
 	}
 
-	login, err := server.ucase.User.Login(ctx, ucase.LoginUserRequest{
+	login, err := s.ucase.User.Login(ctx, ucase.LoginUserRequest{
 		Username:  req.Username,
 		Password:  req.Password,
 		UserAgent: ctx.Request.UserAgent(),
@@ -92,7 +92,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	rsp := loginUserResponse{
+	rsp := LoginUserResponse{
 		SessionID:             login.SessionID,
 		AccessToken:           login.AccessToken,
 		AccessTokenExpiresAt:  login.AccessTokenExpiresAt,
@@ -101,14 +101,4 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		User:                  convertUser(&login.User),
 	}
 	ctx.JSON(http.StatusOK, rsp)
-}
-
-func convertUser(user *ucase.UserResponse) userResponse {
-	return userResponse{
-		Username:          user.Username,
-		FullName:          user.FullName,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
 }
