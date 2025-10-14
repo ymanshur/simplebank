@@ -42,14 +42,22 @@ func ValidCurrency(value any) error {
 	return nil
 }
 
-func ValidID() validation.Rule {
-	return validation.Min(1)
-}
-
 func ValidPageSize(value any) error {
 	n, ok := value.(int)
 	if ok && n != 0 {
 		return validateRange(n, 5, 10)
 	}
 	return nil
+}
+
+func ValidSecretCode(value any) error {
+	s, ok := value.(string)
+	if ok && s != "" {
+		return validateSecretCode(s)
+	}
+	return nil
+}
+
+func ValidID() validation.Rule {
+	return validation.Min(1)
 }

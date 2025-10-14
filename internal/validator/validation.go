@@ -68,3 +68,7 @@ func validateCurrency(value string) error {
 	}
 	return nil
 }
+
+func validateSecretCode(value string) error {
+	return validateString(value, 32, 128)
+}
