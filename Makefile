@@ -46,7 +46,7 @@ migratedrop:
 migratereset: migratedrop migrateup
 
 sqlc:
-	sqlc generate -f db/db.yaml
+	sqlc generate -f db/query.yaml
 
 test:
 	go test -v -cover -short ./...
